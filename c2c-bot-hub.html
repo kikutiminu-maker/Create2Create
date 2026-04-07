@@ -1,0 +1,4949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C2C — Bot Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ===================== HUB SHELL ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #111;
+  --border2: #2a2a2a;
+  --ink: #f0f0f0;
+  --muted: #555;
+  --muted2: #888;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: "Lora", serif; min-height: 100vh; }
+
+/* SIDEBAR */
+.hub {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #0d0d0d;
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.logo-mark {
+  font-family: "Merriweather", serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+.logo-mark .two { color: #555; }
+
+.logo-name {
+  font-family: "Lora", serif;
+  font-size: 10px;
+  color: var(--muted2);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.sidebar-label {
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 20px 20px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.03); }
+
+.nav-item.active {
+  background: rgba(255,255,255,0.05);
+  border-left-color: var(--ink);
+}
+
+.nav-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-text {}
+
+.nav-title {
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  transition: color 0.15s;
+}
+
+.nav-item.active .nav-title,
+.nav-item:hover .nav-title { color: var(--ink); }
+
+.nav-sub {
+  font-family: "Lora", serif;
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 1px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px;
+  border-top: 1px solid var(--border2);
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* MAIN CONTENT */
+.main-content {
+  margin-left: 220px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* BOT PANES */
+.bot-pane { display: none; }
+.bot-pane.active { display: block; }
+
+/* HOME PANE */
+.home-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 60px 48px;
+  max-width: 700px;
+}
+
+.home-eyebrow {
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.home-headline {
+  font-family: "Merriweather", serif;
+  font-weight: 900;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  color: var(--ink);
+}
+
+.home-headline em {
+  font-style: italic;
+  color: #555;
+}
+
+.home-sub {
+  font-family: "Lora", serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted2);
+  margin-bottom: 48px;
+  max-width: 500px;
+}
+
+.bot-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.bot-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bot-card:hover { border-color: #444; background: #151515; }
+
+.bot-card-icon { font-size: 20px; margin-bottom: 10px; }
+
+.bot-card-title {
+  font-family: "Merriweather", serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.bot-card-desc {
+  font-family: "Lora", serif;
+  font-size: 11px;
+  color: var(--muted2);
+  line-height: 1.55;
+}
+
+.bot-card-tag {
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+/* MOBILE */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--ink);
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+@media (max-width: 700px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .menu-toggle { display: block; }
+  .home-headline { font-size: 32px; }
+  .bot-cards { grid-template-columns: 1fr; }
+  .home-pane { padding: 80px 24px 40px; }
+}
+</style>
+
+<!-- BOT STYLES INJECTED BELOW (scoped per pane) -->
+
+<style id="style-email">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --ink: #f0f0f0;
+    --muted: #555;
+    --muted2: #888;
+    --accent: #f0f0f0;
+    --active: #ffffff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    min-height: 100vh;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border2);
+    margin-bottom: 36px;
+  }
+
+  .logo-mark {
+    font-family: 'Merriweather', serif;
+    font-weight: 900;
+    font-size: 26px;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-mark .two { color: #555; }
+
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+
+  /* EMAIL TYPE SELECTOR */
+  .type-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .type-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .type-btn:hover { border-color: #444; color: var(--ink); }
+
+  .type-btn.active {
+    background: var(--ink);
+    color: #000;
+    border-color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* TYPE DESCRIPTION */
+  .type-desc {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--ink);
+    padding: 14px 16px;
+    margin-bottom: 28px;
+    border-radius: 0 2px 2px 0;
+    display: none;
+  }
+
+  .type-desc.visible { display: block; }
+
+  .type-desc-title {
+    font-family: 'Merriweather', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .type-desc-body {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.6;
+  }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+
+  .field label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .field input, .field select, .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #444;
+  }
+
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+  .field textarea.tall { min-height: 120px; }
+  .field select option { background: #111; }
+
+  /* DYNAMIC FIELD — shows based on email type */
+  .dynamic-field { display: none; }
+  .dynamic-field.visible { display: flex; }
+
+  /* SLIDERS */
+  .slider-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .slider-field { display: flex; flex-direction: column; gap: 6px; }
+
+  .slider-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .slider-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .slider-val {
+    font-family: 'Merriweather', serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--ink);
+  }
+
+  .slider-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    height: 2px;
+    background: var(--border2);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--ink);
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  /* GENERATE */
+  .gen-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .btn-gen {
+    background: var(--ink);
+    color: #000;
+    font-family: 'Merriweather', serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    padding: 13px 28px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn-gen:hover { opacity: 0.85; }
+  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-clear {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 13px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn-clear:hover { border-color: #555; color: var(--ink); }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 1px;
+  }
+
+  /* OUTPUT */
+  .output { display: none; margin-top: 40px; }
+  .output.visible { display: block; }
+
+  .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+  }
+
+  .out-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .btn-copy {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn-copy:hover { border-color: var(--ink); color: var(--ink); }
+
+  .out-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border2);
+    margin-top: 16px;
+  }
+
+  .out-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .out-tab:hover { color: var(--ink); }
+  .out-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .out-block {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-top: none;
+    padding: 24px;
+  }
+
+  .out-section { margin-bottom: 24px; }
+  .out-section:last-child { margin-bottom: 0; }
+
+  .out-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .out-text {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #ccc;
+    white-space: pre-wrap;
+  }
+
+  .out-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #aaa;
+    white-space: pre-wrap;
+  }
+
+  .subject-line {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: #ccc;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .score-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted2);
+    width: 160px;
+    flex-shrink: 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .score-bar-wrap { flex: 1; height: 2px; background: var(--border2); }
+  .score-bar { height: 100%; background: var(--ink); transition: width 0.8s ease; }
+  .score-num { font-family: 'Merriweather', serif; font-size: 13px; font-weight: 700; color: var(--ink); width: 20px; text-align: right; }
+
+  @media (max-width: 600px) {
+    .type-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .slider-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<style id="style-shortform">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --ink: #f0f0f0;
+    --muted: #555;
+    --muted2: #888;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: 'Lora', serif; min-height: 100vh; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border2);
+    margin-bottom: 36px;
+  }
+
+  .logo-mark { font-family: 'Merriweather', serif; font-weight: 900; font-size: 26px; color: var(--ink); letter-spacing: -0.5px; }
+  .logo-mark .two { color: #555; }
+  .header-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted2); }
+
+  .section-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  /* TYPE SELECTOR */
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .type-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .type-btn:hover { border-color: #444; color: var(--ink); }
+  .type-btn.active { background: var(--ink); color: #000; border-color: var(--ink); }
+
+  .type-desc {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--ink);
+    padding: 14px 16px;
+    margin-bottom: 28px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .type-desc-title { font-family: 'Merriweather', serif; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .type-desc-body { font-family: 'Lora', serif; font-size: 12px; color: var(--muted2); line-height: 1.6; }
+
+  /* PLATFORM SELECTOR */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .plat-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .plat-btn:hover { border-color: #444; color: var(--ink); }
+  .plat-btn.active { border-color: var(--ink); color: var(--ink); background: rgba(240,240,240,0.05); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+
+  .field label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  .field input, .field select, .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: var(--ink);
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #444; }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+  .field textarea.tall { min-height: 120px; }
+  .field select option { background: #111; }
+
+  .dynamic-field { display: none; }
+  .dynamic-field.visible { display: flex; }
+
+  /* DURATION SELECTOR */
+  .duration-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .dur-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .dur-btn:hover { border-color: #444; color: var(--ink); }
+  .dur-btn.active { border-color: var(--ink); color: var(--ink); background: rgba(240,240,240,0.05); }
+
+  /* SLIDER */
+  .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .slider-field { display: flex; flex-direction: column; gap: 6px; }
+  .slider-top { display: flex; justify-content: space-between; align-items: center; }
+  .slider-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .slider-val { font-family: 'Merriweather', serif; font-size: 20px; font-weight: 900; color: var(--ink); }
+  .slider-desc { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+  input[type="range"] {
+    -webkit-appearance: none; height: 2px; background: var(--border2);
+    border: none; padding: 0; cursor: pointer; width: 100%; margin-top: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; background: var(--ink); border-radius: 0; cursor: pointer;
+  }
+
+  /* GEN ROW */
+  .gen-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+
+  .btn-gen {
+    background: var(--ink); color: #000; font-family: 'Merriweather', serif; font-weight: 900;
+    font-size: 14px; letter-spacing: 0.5px; padding: 13px 28px; border: none; cursor: pointer;
+    transition: opacity 0.15s; border-radius: 2px;
+  }
+  .btn-gen:hover { opacity: 0.85; }
+  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-clear {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 13px 18px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-clear:hover { border-color: #555; color: var(--ink); }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); letter-spacing: 1px; }
+
+  /* OUTPUT */
+  .output { display: none; margin-top: 40px; }
+  .output.visible { display: block; }
+
+  .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; }
+  .out-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+
+  .btn-copy {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-copy:hover { border-color: var(--ink); color: var(--ink); }
+
+  .out-tabs { display: flex; border-bottom: 1px solid var(--border2); margin-top: 16px; }
+  .out-tab {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+  }
+  .out-tab:hover { color: var(--ink); }
+  .out-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .out-block { background: var(--surface); border: 1px solid var(--border2); border-top: none; padding: 24px; }
+  .out-section { margin-bottom: 24px; }
+  .out-section:last-child { margin-bottom: 0; }
+
+  .out-section-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border2);
+  }
+
+  /* SCRIPT DISPLAY */
+  .script-lines { display: flex; flex-direction: column; gap: 0; }
+
+  .script-line {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .script-line:last-child { border-bottom: none; }
+
+  .line-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 12px 12px 0;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border2);
+  }
+
+  .line-text {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #ccc;
+    padding: 12px 0 12px 16px;
+    white-space: pre-wrap;
+  }
+
+  .line-text.hook-text { color: var(--ink); font-weight: 600; }
+
+  .out-text { font-family: 'Lora', serif; font-size: 14px; line-height: 1.75; color: #ccc; white-space: pre-wrap; }
+  .out-mono { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.7; color: #aaa; white-space: pre-wrap; }
+
+  .hook-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+
+  .hook-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000;
+    background: var(--ink);
+    display: inline-block;
+    padding: 2px 7px;
+    margin-bottom: 6px;
+    border-radius: 1px;
+  }
+
+  .hook-text-block { font-family: 'Lora', serif; font-size: 13px; color: #ccc; line-height: 1.55; }
+
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .score-name { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted2); width: 160px; flex-shrink: 0; letter-spacing: 1px; text-transform: uppercase; }
+  .score-bar-wrap { flex: 1; height: 2px; background: var(--border2); }
+  .score-bar { height: 100%; background: var(--ink); transition: width 0.8s ease; }
+  .score-num { font-family: 'Merriweather', serif; font-size: 13px; font-weight: 700; color: var(--ink); width: 20px; text-align: right; }
+
+  @media (max-width: 600px) {
+    .type-grid { grid-template-columns: 1fr; }
+    .platform-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .slider-row { grid-template-columns: 1fr; }
+    .duration-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<style id="style-youtube">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --ink: #f0f0f0;
+    --muted: #555;
+    --muted2: #888;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: 'Lora', serif; min-height: 100vh; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: 20px; border-bottom: 1px solid var(--border2); margin-bottom: 36px;
+  }
+  .logo-mark { font-family: 'Merriweather', serif; font-weight: 900; font-size: 26px; color: var(--ink); letter-spacing: -0.5px; }
+  .logo-mark .two { color: #555; }
+  .header-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted2); }
+
+  .section-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  /* MODE SELECTOR — the 4 stages */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .mode-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mode-btn:hover { border-color: #444; color: var(--ink); }
+  .mode-btn.active { background: var(--ink); color: #000; border-color: var(--ink); }
+
+  .mode-num {
+    font-family: 'Merriweather', serif;
+    font-weight: 900;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .mode-btn.active .mode-num { color: #000; }
+
+  .mode-desc {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--ink);
+    padding: 14px 16px;
+    margin-bottom: 28px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .mode-desc-title { font-family: 'Merriweather', serif; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .mode-desc-body { font-family: 'Lora', serif; font-size: 12px; color: var(--muted2); line-height: 1.6; }
+
+  /* VIDEO TYPE */
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .type-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .type-btn:hover { border-color: #444; color: var(--ink); }
+  .type-btn.active { border-color: var(--ink); color: var(--ink); background: rgba(240,240,240,0.05); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  .field input, .field select, .field textarea {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 2px;
+    color: var(--ink); font-family: 'Lora', serif; font-size: 13px;
+    padding: 10px 12px; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #444; }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+  .field textarea.tall { min-height: 120px; }
+  .field select option { background: #111; }
+
+  /* IDEA INPUT — only for mode 1 */
+  .dynamic-section { display: none; }
+  .dynamic-section.visible { display: block; }
+
+  /* SAVED IDEAS BANK */
+  .ideas-bank {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .ideas-bank-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .idea-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .idea-pill {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 6px 12px;
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .idea-pill:hover { border-color: #444; color: var(--ink); }
+
+  .idea-pill .pill-x {
+    font-size: 10px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .idea-pill .pill-x:hover { color: #f04; }
+
+  /* SLIDER */
+  .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .slider-field { display: flex; flex-direction: column; gap: 6px; }
+  .slider-top { display: flex; justify-content: space-between; align-items: center; }
+  .slider-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .slider-val { font-family: 'Merriweather', serif; font-size: 20px; font-weight: 900; color: var(--ink); }
+  .slider-desc { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+  input[type="range"] {
+    -webkit-appearance: none; height: 2px; background: var(--border2);
+    border: none; padding: 0; cursor: pointer; width: 100%; margin-top: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; background: var(--ink); border-radius: 0; cursor: pointer;
+  }
+
+  /* GEN ROW */
+  .gen-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+  .btn-gen {
+    background: var(--ink); color: #000; font-family: 'Merriweather', serif; font-weight: 900;
+    font-size: 14px; letter-spacing: 0.5px; padding: 13px 28px; border: none;
+    cursor: pointer; transition: opacity 0.15s; border-radius: 2px;
+  }
+  .btn-gen:hover { opacity: 0.85; }
+  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-clear {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 13px 18px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-clear:hover { border-color: #555; color: var(--ink); }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); letter-spacing: 1px; }
+
+  /* OUTPUT */
+  .output { display: none; margin-top: 40px; }
+  .output.visible { display: block; }
+  .output-header { display: flex; justify-content: space-between; align-items: center; }
+  .out-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .btn-copy {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-copy:hover { border-color: var(--ink); color: var(--ink); }
+
+  .out-tabs { display: flex; border-bottom: 1px solid var(--border2); margin-top: 16px; gap: 0; flex-wrap: wrap; }
+  .out-tab {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+  }
+  .out-tab:hover { color: var(--ink); }
+  .out-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .out-block { background: var(--surface); border: 1px solid var(--border2); border-top: none; padding: 24px; }
+  .out-section { margin-bottom: 28px; }
+  .out-section:last-child { margin-bottom: 0; }
+  .out-section-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border2);
+  }
+
+  .out-text { font-family: 'Lora', serif; font-size: 14px; line-height: 1.75; color: #ccc; white-space: pre-wrap; }
+  .out-mono { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.7; color: #aaa; white-space: pre-wrap; }
+
+  /* IDEA CARDS */
+  .idea-cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .idea-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .idea-card:hover { border-color: #444; }
+
+  .idea-card-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .idea-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .idea-card-angle {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.5;
+  }
+
+  .idea-card-save {
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: inline-block;
+    border: 1px solid var(--border2);
+    padding: 4px 10px;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  .idea-card-save:hover { border-color: var(--ink); color: var(--ink); }
+  .idea-card-save.saved { border-color: var(--ink); color: var(--ink); }
+
+  /* TITLE CARDS */
+  .title-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+
+  .title-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000;
+    background: var(--ink);
+    display: inline-block;
+    padding: 2px 7px;
+    margin-bottom: 6px;
+    border-radius: 1px;
+  }
+
+  .title-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .title-card-hook {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: var(--muted2);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* OUTLINE */
+  .outline-section {
+    border-left: 2px solid var(--border2);
+    padding-left: 16px;
+    margin-bottom: 16px;
+  }
+
+  .outline-section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .outline-section-title {
+    font-family: 'Merriweather', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .outline-section-body {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+
+  /* FULL SCRIPT */
+  .script-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .script-section:last-child { border-bottom: none; }
+
+  .script-section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 8px;
+  }
+
+  .script-section-text {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #ccc;
+    white-space: pre-wrap;
+  }
+
+  .script-section-text.hook { color: var(--ink); font-size: 15px; font-weight: 600; }
+
+  /* SCORE */
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .score-name { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted2); width: 160px; flex-shrink: 0; letter-spacing: 1px; text-transform: uppercase; }
+  .score-bar-wrap { flex: 1; height: 2px; background: var(--border2); }
+  .score-bar { height: 100%; background: var(--ink); transition: width 0.8s ease; }
+  .score-num { font-family: 'Merriweather', serif; font-size: 13px; font-weight: 700; color: var(--ink); width: 20px; text-align: right; }
+
+  @media (max-width: 600px) {
+    .mode-grid { grid-template-columns: repeat(2, 1fr); }
+    .type-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .slider-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<style id="style-rubric">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --ink: #f0f0f0;
+    --muted: #555;
+    --muted2: #888;
+    --red: #ff4444;
+    --yellow: #f5c518;
+    --green: #44cc77;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: 'Lora', serif; min-height: 100vh; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: 20px; border-bottom: 1px solid var(--border2); margin-bottom: 36px;
+  }
+  .logo-mark { font-family: 'Merriweather', serif; font-weight: 900; font-size: 26px; color: var(--ink); letter-spacing: -0.5px; }
+  .logo-mark .two { color: #555; }
+  .header-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted2); }
+
+  .section-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  /* FORMAT SELECTOR */
+  .format-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .fmt-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .fmt-btn:hover { border-color: #444; color: var(--ink); }
+  .fmt-btn.active { background: var(--ink); color: #000; border-color: var(--ink); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  .field input, .field select, .field textarea {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 2px;
+    color: var(--ink); font-family: 'Lora', serif; font-size: 13px;
+    padding: 10px 12px; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #444; }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .field textarea.xl { min-height: 240px; font-size: 14px; }
+  .field select option { background: #111; }
+
+  /* SLIDER */
+  .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .slider-field { display: flex; flex-direction: column; gap: 6px; }
+  .slider-top { display: flex; justify-content: space-between; align-items: center; }
+  .slider-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .slider-val { font-family: 'Merriweather', serif; font-size: 20px; font-weight: 900; color: var(--ink); }
+  .slider-desc { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+  input[type="range"] {
+    -webkit-appearance: none; height: 2px; background: var(--border2);
+    border: none; padding: 0; cursor: pointer; width: 100%; margin-top: 4px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; background: var(--ink); border-radius: 0; cursor: pointer;
+  }
+
+  /* GEN ROW */
+  .gen-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+  .btn-gen {
+    background: var(--ink); color: #000; font-family: 'Merriweather', serif; font-weight: 900;
+    font-size: 14px; letter-spacing: 0.5px; padding: 13px 28px; border: none;
+    cursor: pointer; transition: opacity 0.15s; border-radius: 2px;
+  }
+  .btn-gen:hover { opacity: 0.85; }
+  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-clear {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 13px 18px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-clear:hover { border-color: #555; color: var(--ink); }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); letter-spacing: 1px; }
+
+  /* OUTPUT */
+  .output { display: none; margin-top: 40px; }
+  .output.visible { display: block; }
+
+  /* OVERALL SCORE HERO */
+  .score-hero {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 2px;
+  }
+
+  .score-big {
+    font-family: 'Merriweather', serif;
+    font-weight: 900;
+    font-size: 80px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .score-big.low { color: var(--red); }
+  .score-big.mid { color: var(--yellow); }
+  .score-big.high { color: var(--green); }
+
+  .score-hero-right {}
+
+  .score-verdict {
+    font-family: 'Merriweather', serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .score-summary {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.65;
+  }
+
+  /* TABS */
+  .out-tabs { display: flex; border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
+  .out-tab {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+  }
+  .out-tab:hover { color: var(--ink); }
+  .out-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .out-block { background: var(--surface); border: 1px solid var(--border2); border-top: none; padding: 24px; }
+  .out-section { margin-bottom: 28px; }
+  .out-section:last-child { margin-bottom: 0; }
+  .out-section-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border2);
+  }
+
+  .out-text { font-family: 'Lora', serif; font-size: 14px; line-height: 1.75; color: #ccc; white-space: pre-wrap; }
+
+  /* SCORE ROWS */
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .score-name { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted2); width: 180px; flex-shrink: 0; letter-spacing: 1px; text-transform: uppercase; }
+  .score-bar-wrap { flex: 1; height: 3px; background: var(--border2); }
+  .score-bar { height: 100%; transition: width 0.9s ease; }
+  .score-bar.low { background: var(--red); }
+  .score-bar.mid { background: var(--yellow); }
+  .score-bar.high { background: var(--green); }
+  .score-num { font-family: 'Merriweather', serif; font-size: 14px; font-weight: 900; width: 24px; text-align: right; }
+  .score-num.low { color: var(--red); }
+  .score-num.mid { color: var(--yellow); }
+  .score-num.high { color: var(--green); }
+
+  /* PRIORITY FIX LIST */
+  .fix-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--red);
+    border-radius: 0 2px 2px 0;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+
+  .fix-card.mid { border-left-color: var(--yellow); }
+  .fix-card.low { border-left-color: var(--border2); }
+
+  .fix-priority {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .fix-title {
+    font-family: 'Merriweather', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .fix-problem {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .fix-rewrite-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+
+  .fix-rewrite {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.6;
+    font-style: italic;
+    background: rgba(68,204,119,0.05);
+    border: 1px solid rgba(68,204,119,0.15);
+    padding: 10px 12px;
+    border-radius: 2px;
+  }
+
+  /* ANNOTATED COPY */
+  .annotated-line {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .annotated-line:last-child { border-bottom: none; }
+
+  .ann-original {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: #888;
+    line-height: 1.6;
+  }
+
+  .ann-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted2);
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+  }
+
+  .ann-note.good { color: var(--green); }
+  .ann-note.weak { color: var(--yellow); }
+  .ann-note.fix { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .format-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .slider-row { grid-template-columns: 1fr; }
+    .score-hero { flex-direction: column; gap: 16px; }
+    .score-big { font-size: 60px; }
+    .annotated-line { grid-template-columns: 1fr; }
+  }
+</style>
+
+
+<style id="style-study">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --ink: #f0f0f0;
+    --muted: #555;
+    --muted2: #888;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: 'Lora', serif; min-height: 100vh; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: 20px; border-bottom: 1px solid var(--border2); margin-bottom: 36px;
+  }
+  .logo-mark { font-family: 'Merriweather', serif; font-weight: 900; font-size: 26px; color: var(--ink); letter-spacing: -0.5px; }
+  .logo-mark .two { color: #555; }
+  .header-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted2); }
+
+  .section-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  /* STUDY MODE */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .mode-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mode-btn:hover { border-color: #444; color: var(--ink); }
+  .mode-btn.active { background: var(--ink); color: #000; border-color: var(--ink); }
+  .mode-icon { font-size: 20px; }
+  .mode-btn.active .mode-icon { filter: none; }
+
+  .mode-desc {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--ink);
+    padding: 14px 16px;
+    margin-bottom: 28px;
+    border-radius: 0 2px 2px 0;
+  }
+  .mode-desc-title { font-family: 'Merriweather', serif; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .mode-desc-body { font-family: 'Lora', serif; font-size: 12px; color: var(--muted2); line-height: 1.6; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  .field input, .field select, .field textarea {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 2px;
+    color: var(--ink); font-family: 'Lora', serif; font-size: 13px;
+    padding: 10px 12px; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #444; }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+  .field select option { background: #111; }
+
+  .dynamic-field { display: none; }
+  .dynamic-field.visible { display: flex; }
+
+  /* FOCUS AREA CHECKBOXES */
+  .focus-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .focus-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+    user-select: none;
+  }
+
+  .focus-btn:hover { border-color: #444; color: var(--ink); }
+  .focus-btn.selected { border-color: var(--ink); color: var(--ink); background: rgba(240,240,240,0.05); }
+
+  /* GEN ROW */
+  .gen-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+  .btn-gen {
+    background: var(--ink); color: #000; font-family: 'Merriweather', serif; font-weight: 900;
+    font-size: 14px; letter-spacing: 0.5px; padding: 13px 28px; border: none;
+    cursor: pointer; transition: opacity 0.15s; border-radius: 2px;
+  }
+  .btn-gen:hover { opacity: 0.85; }
+  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-clear {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 13px 18px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-clear:hover { border-color: #555; color: var(--ink); }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); letter-spacing: 1px; }
+
+  /* OUTPUT */
+  .output { display: none; margin-top: 40px; }
+  .output.visible { display: block; }
+  .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .out-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .btn-copy {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted2);
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 2px;
+  }
+  .btn-copy:hover { border-color: var(--ink); color: var(--ink); }
+
+  .out-tabs { display: flex; border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
+  .out-tab {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+  }
+  .out-tab:hover { color: var(--ink); }
+  .out-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  .out-block { background: var(--surface); border: 1px solid var(--border2); border-top: none; padding: 24px; }
+  .out-section { margin-bottom: 28px; }
+  .out-section:last-child { margin-bottom: 0; }
+  .out-section-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border2);
+  }
+  .out-text { font-family: 'Lora', serif; font-size: 14px; line-height: 1.75; color: #ccc; white-space: pre-wrap; }
+  .out-mono { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.7; color: #aaa; white-space: pre-wrap; }
+
+  /* SUBJECT PROFILE CARD */
+  .profile-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .profile-stat {}
+  .profile-stat-num {
+    font-family: 'Merriweather', serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .profile-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* PATTERN CARDS */
+  .pattern-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+
+  .pattern-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .pattern-title {
+    font-family: 'Merriweather', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .pattern-body {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .pattern-example {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #777;
+    border-left: 2px solid var(--border2);
+    padding-left: 10px;
+    line-height: 1.5;
+  }
+
+  /* STEAL CARDS */
+  .steal-card {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--ink);
+    border-radius: 0 2px 2px 0;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+
+  .steal-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .steal-principle {
+    font-family: 'Merriweather', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .steal-original {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .steal-apply-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #44cc77;
+    margin-bottom: 4px;
+  }
+
+  .steal-apply {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.6;
+    background: rgba(68,204,119,0.05);
+    border: 1px solid rgba(68,204,119,0.15);
+    padding: 10px 12px;
+    border-radius: 2px;
+  }
+
+  /* SWIPE FILE */
+  .swipe-item {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+
+  .swipe-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000;
+    background: var(--ink);
+    display: inline-block;
+    padding: 2px 7px;
+    margin-bottom: 8px;
+    border-radius: 1px;
+  }
+
+  .swipe-text {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .swipe-why {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 600px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .focus-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .profile-card { grid-template-columns: 1fr; gap: 12px; }
+  }
+</style>
+
+<style id="style-outreach">
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; }
+.wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+h1 { font-size: 18px; font-weight: 600; color: #111; margin-bottom: 1.5rem; }
+.step { display: none; }
+.step.active { display: block; }
+.label { font-size: 13px; color: #666; margin-bottom: 6px; display: block; }
+.field-group { margin-bottom: 1.1rem; }
+input {
+  width: 100%; font-family: inherit; font-size: 14px;
+  color: #111; background: #fff;
+  border: 1px solid #ddd; border-radius: 8px;
+  padding: 8px 12px; outline: none;
+}
+input:focus { border-color: #999; }
+.pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.pill {
+  font-size: 13px; padding: 5px 14px; border-radius: 20px;
+  border: 1px solid #ddd; background: transparent; color: #666; cursor: pointer; font-family: inherit;
+}
+.pill.selected { background: #111; color: #fff; border-color: #111; }
+.pill:hover:not(.selected) { background: #f5f5f5; }
+.btn-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+button {
+  font-family: inherit; font-size: 14px; padding: 8px 18px;
+  border-radius: 8px; border: 1px solid #ddd;
+  background: transparent; color: #111; cursor: pointer;
+}
+button:hover { background: #f5f5f5; }
+button.primary { background: #111; color: #fff; border-color: #111; }
+button.primary:hover { opacity: 0.85; }
+button.danger { color: #c00; border-color: #f5c6c6; }
+button.danger:hover { background: #fff5f5; }
+.divider { border: none; border-top: 1px solid #eee; margin: 1.25rem 0; }
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  color: #999; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.copy-btn { font-size: 11px; padding: 3px 10px; border-radius: 20px; margin-left: auto; }
+.copy-btn.copied { color: #1a7a3f; border-color: #a3d9b8; }
+.output-box {
+  background: #f9f9f9; border: 1px solid #eee; border-radius: 12px;
+  padding: 1rem 1.25rem; font-size: 13.5px; line-height: 1.8;
+  color: #111; white-space: pre-wrap; margin-bottom: 0.5rem;
+}
+.subject-line { font-size: 12px; color: #666; margin-bottom: 8px; }
+.subject-line span { color: #111; font-weight: 500; }
+.tab-row { display: flex; gap: 0; margin-bottom: 1.25rem; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+.tab {
+  font-size: 13px; padding: 8px 16px; cursor: pointer;
+  color: #999; border: none; background: transparent;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: inherit;
+}
+.tab:hover { color: #111; background: transparent; }
+.tab.active { color: #111; border-bottom: 2px solid #111; font-weight: 500; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.note { font-size: 12px; color: #888; font-style: italic; }
+.save-bar {
+  background: #f9f9f9; border: 1px solid #eee; border-radius: 12px;
+  padding: 12px 16px; margin-top: 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.save-bar-left { font-size: 13px; color: #666; }
+.save-bar-left span { color: #111; font-weight: 500; }
+.queue-item {
+  border: 1px solid #eee; border-radius: 12px;
+  padding: 1rem 1.25rem; margin-bottom: 12px; background: #fff;
+}
+.queue-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.queue-item-title { font-size: 14px; font-weight: 500; color: #111; }
+.queue-item-meta { font-size: 12px; color: #888; margin-top: 2px; }
+.queue-msg {
+  background: #f9f9f9; border-radius: 8px;
+  padding: 10px 14px; font-size: 13px; line-height: 1.75;
+  color: #111; white-space: pre-wrap; margin-bottom: 8px;
+}
+.queue-msg-label {
+  font-size: 11px; color: #888; font-weight: 500;
+  margin-bottom: 5px; display: flex; align-items: center; gap: 6px;
+}
+.badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  background: #f5f5f5; border: 1px solid #eee; color: #888;
+}
+.empty-state { text-align: center; padding: 3rem 1rem; color: #999; font-size: 14px; }
+.nav-tabs { display: flex; gap: 0; border-bottom: 1px solid #eee; margin-bottom: 1.5rem; }
+.nav-tab {
+  font-size: 14px; padding: 10px 20px; cursor: pointer;
+  color: #999; border: none; background: transparent; font-family: inherit;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 400;
+}
+.nav-tab:hover { color: #111; background: transparent; }
+.nav-tab.active { color: #111; border-bottom: 2px solid #111; font-weight: 500; }
+.counter {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #111; color: #fff;
+  font-size: 11px; font-weight: 500; margin-left: 6px;
+}
+.logo { font-size: 13px; font-weight: 600; letter-spacing: 0.05em; color: #999; margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">☰ MENU</button>
+
+<div class="hub">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">[C<span class="two">2</span>C]</div>
+      <div class="logo-name">Bot Hub</div>
+    </div>
+
+    <div class="sidebar-label">Writing Bots</div>
+
+    <div class="nav-item active" onclick="showBot('home')">
+      <div class="nav-icon">⌂</div>
+      <div class="nav-text">
+        <div class="nav-title">Home</div>
+        <div class="nav-sub">All bots</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="showBot('email')">
+      <div class="nav-icon">✉</div>
+      <div class="nav-text">
+        <div class="nav-title">Email Bot</div>
+        <div class="nav-sub">Value, Story, Discovery, Testimonial, Offer</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="showBot('shortform')">
+      <div class="nav-icon">📱</div>
+      <div class="nav-text">
+        <div class="nav-title">Short-Form Bot</div>
+        <div class="nav-sub">Educational, Story, Polarizing</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="showBot('youtube')">
+      <div class="nav-icon">🎬</div>
+      <div class="nav-text">
+        <div class="nav-title">YouTube Bot</div>
+        <div class="nav-sub">Ideas, Titles, Outline, Script</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="showBot('rubric')">
+      <div class="nav-icon">📊</div>
+      <div class="nav-text">
+        <div class="nav-title">Rubric Bot</div>
+        <div class="nav-sub">Score + fix any copy</div>
+      </div>
+    </div>
+
+
+    <div class="nav-item" onclick="showBot('study')">
+      <div class="nav-icon">🔍</div>
+      <div class="nav-text">
+        <div class="nav-title">Study Bot</div>
+        <div class="nav-sub">Steal from the best</div>
+      </div>
+    </div>
+
+
+    <div class="nav-item" onclick="showBot('outreach')">
+      <div class="nav-icon">📨</div>
+      <div class="nav-text">
+        <div class="nav-title">Outreach Bot</div>
+        <div class="nav-sub">DM scripts that convert</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">[C2C] Created 2 Create</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- HOME -->
+    <div class="bot-pane active" id="pane-home">
+      <div class="home-pane">
+        <div class="home-eyebrow">Created 2 Create</div>
+        <h1 class="home-headline">Your copy.<br><em>All in one place.</em></h1>
+        <p class="home-sub">Every writing bot you need — emails, scripts, YouTube, and scoring — built for coaches and creators. Pick a bot and start writing.</p>
+        <div class="bot-cards">
+          <div class="bot-card" onclick="showBot('email')">
+            <div class="bot-card-icon">✉</div>
+            <div class="bot-card-title">Email Bot</div>
+            <div class="bot-card-desc">Write value, story, discovery, testimonial, and new offer emails in minutes.</div>
+            <div class="bot-card-tag">5 Email Types</div>
+          </div>
+          <div class="bot-card" onclick="showBot('shortform')">
+            <div class="bot-card-icon">📱</div>
+            <div class="bot-card-title">Short-Form Script Bot</div>
+            <div class="bot-card-desc">Scripts for TikTok, Reels, and Shorts — educational, story, and polarizing.</div>
+            <div class="bot-card-tag">3 Script Types · 3 Platforms</div>
+          </div>
+          <div class="bot-card" onclick="showBot('youtube')">
+            <div class="bot-card-icon">🎬</div>
+            <div class="bot-card-title">YouTube Bot</div>
+            <div class="bot-card-desc">Generate ideas, titles, outlines, and full word-for-word scripts.</div>
+            <div class="bot-card-tag">Ideas → Titles → Outline → Script</div>
+          </div>
+          <div class="bot-card" onclick="showBot('rubric')">
+            <div class="bot-card-icon">📊</div>
+            <div class="bot-card-title">Rubric Bot</div>
+            <div class="bot-card-desc">Paste any copy. Get an honest score, priority fixes, and a full rewrite.</div>
+            <div class="bot-card-tag">6 Formats · Line-by-Line Feedback</div>
+          </div>
+                    <div class="bot-card" onclick="showBot('study')">
+            <div class="bot-card-icon">🔍</div>
+            <div class="bot-card-title">Study Bot</div>
+            <div class="bot-card-desc">Analyze creators, brands, or copy. Extract patterns and steal what works.</div>
+            <div class="bot-card-tag">Creator · Brand · Copy Analysis</div>
+          </div>
+          <div class="bot-card" onclick="showBot('outreach')">
+            <div class="bot-card-icon">📨</div>
+            <div class="bot-card-title">Outreach Bot</div>
+            <div class="bot-card-desc">Generate personalized DM scripts to land clients and brand deals.</div>
+            <div class="bot-card-tag">Cold DM · Warm Outreach · Follow-Up</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- OUTREACH BOT -->
+    <div class="bot-pane" id="pane-outreach">
+      <div class="wrap">
+  <div class="logo">C2C OUTREACH BOT</div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('generator')">Generator</button>
+    <button class="nav-tab" onclick="showPage('queue')">Queue <span class="counter" id="queueCount">0</span></button>
+  </div>
+
+  <div id="page-generator">
+    <div class="step active" id="step1">
+      <div class="field-group">
+        <span class="label">First name</span>
+        <input type="text" id="firstName" placeholder="e.g. Kevin" />
+      </div>
+      <div class="field-group">
+        <span class="label">Product / offer name</span>
+        <input type="text" id="offerName" placeholder="e.g. Kev's AI OS Academy" />
+      </div>
+      <div class="field-group">
+        <span class="label">Free copy type</span>
+        <div class="pill-row" id="copyPills">
+          <div class="pill" data-val="IG Reel Scripts & CTA Story Sequences">IG Reel Scripts & CTA Story Sequences</div>
+          <div class="pill" data-val="YouTube Ideas, Titles & Hooks">YouTube Ideas, Titles & Hooks</div>
+          <div class="pill" data-val="Value and Sales Emails">Value and Sales Emails</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="label">Google Doc link <span style="color:#999; font-weight:400;">(for front-end scripts)</span></span>
+        <input type="text" id="docLink" placeholder="https://docs.google.com/..." />
+      </div>
+      <div class="field-group">
+        <span class="label">Platform</span>
+        <div class="pill-row" id="platformPills">
+          <div class="pill selected" data-val="both">Both</div>
+          <div class="pill" data-val="ig">Instagram</div>
+          <div class="pill" data-val="email">Email</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="label">Script type</span>
+        <div class="pill-row" id="scriptPills">
+          <div class="pill selected" data-val="both">Both</div>
+          <div class="pill" data-val="backend">Back-end (write after reply)</div>
+          <div class="pill" data-val="frontend">Front-end (write before reply)</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="primary" onclick="generate()">Generate</button>
+        <button onclick="resetForm()">Clear</button>
+      </div>
+    </div>
+
+    <div class="step" id="step2">
+      <div class="tab-row" id="tabRow"></div>
+      <div id="tabContents"></div>
+      <div class="save-bar">
+        <div class="save-bar-left">Save to queue for <span id="saveNameLabel"></span></div>
+        <button class="primary" onclick="saveToQueue()">+ Save to queue</button>
+      </div>
+      <div class="btn-row">
+        <button onclick="back()">Edit</button>
+        <button onclick="resetForm()">New contact</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-queue" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <span style="font-size:15px;font-weight:500;color:#111;">Saved queue</span>
+      <div style="display:flex;gap:8px;">
+        <button class="pill copy-btn" id="copyAllBtn" onclick="copyAll()">Copy all</button>
+        <button class="pill danger" onclick="clearQueue()">Clear all</button>
+      </div>
+    </div>
+    <div id="queueList"><div class="empty-state">No messages saved yet.</div></div>
+  </div>
+</div>
+
+<script>
+let platform = 'both', scriptType = 'both', copyType = '';
+let currentScripts = {}, currentMeta = {};
+let queue = [];
+
+document.querySelectorAll('#copyPills .pill').forEach(p => {
+  p.addEventListener('click', function() {
+    document.querySelectorAll('#copyPills .pill').forEach(x => x.classList.remove('selected'));
+    this.classList.add('selected'); copyType = this.dataset.val;
+  });
+});
+document.querySelectorAll('#platformPills .pill').forEach(p => {
+  p.addEventListener('click', function() {
+    document.querySelectorAll('#platformPills .pill').forEach(x => x.classList.remove('selected'));
+    this.classList.add('selected'); platform = this.dataset.val;
+  });
+});
+document.querySelectorAll('#scriptPills .pill').forEach(p => {
+  p.addEventListener('click', function() {
+    document.querySelectorAll('#scriptPills .pill').forEach(x => x.classList.remove('selected'));
+    this.classList.add('selected'); scriptType = this.dataset.val;
+  });
+});
+
+function showPage(page) {
+  document.getElementById('page-generator').style.display = page === 'generator' ? 'block' : 'none';
+  document.getElementById('page-queue').style.display = page === 'queue' ? 'block' : 'none';
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', (page === 'generator' && i === 0) || (page === 'queue' && i === 1));
+  });
+}
+
+function buildScripts(name, offer, copy, doc) {
+  return {
+    ig_backend: {
+      label: 'IG · Back-end', note: 'Write the copy after they reply', subject: null,
+      main: `hey ${name}, sending this because I would love to work for you on ${offer}. Whether that's writing copy, taking calls, whatever.\n\nbut I wanna prove I can help by writing you ${copy} first to show you my skill. (or I can write anything else you'd want)\n\njust like this DM and I'll write it real quick\n\n(btw if you don't like it you can completely ghost me forever, no hard feelings!)\n\nspeak soon`,
+      followup: `hey ${name}, just checking to see if you still wanted those ${copy}, just let me know ^`,
+      giving: `here's the ${copy} I wrote for you: ${doc || '(Google Doc link)'} lmk what you want me to write next`,
+    },
+    ig_frontend: {
+      label: 'IG · Front-end', note: 'Write the copy first, then send this', subject: null,
+      main: `hey ${name}, sending this because I would love to work for you on ${offer}. Whether that's writing copy, taking calls, whatever.\n\nbut I wanted to prove I can help so I wrote you a ${copy} to show you I'm fr. (I can also write whatever else you'd want)\n\ntry it out and hopefully it helps`,
+      followup: `hey ${name}, just checking to see if you saw the ${copy} I wrote ya ^`,
+      giving: `here's the ${copy} I wrote for you: ${doc || '(Google Doc link)'} lmk what you want me to write next`,
+    },
+    email_backend: {
+      label: 'Email · Back-end', note: 'Write the copy after they reply yes', subject: `${copy} for ${name}`,
+      main: `hey ${name}, tbh I'm sending this because I would love to work for ya and help out with ${offer}. Whether that's writing copy, taking calls, etc.\n\nbut I wanna prove that I'd actually be able to help so I'd like to write a ${copy} for free for you tomorrow. (or whatever else you want me to write)\n\njust shoot me a 'yes' and I'll write it and send it over.\n\n(btw if you don't like it you can completely ghost me forever, no hard feelings!)\n\njust let me know\n\n(reply "not interested" to unsub from my emails)`,
+      followup: `hey ${name}, just checking to see if you still wanted those ${copy}, just let me know ^`,
+      giving: null,
+    },
+    email_frontend: {
+      label: 'Email · Front-end', note: 'Write the copy first, include the link', subject: `${copy} for ${name}`,
+      main: `hey ${name}, tbh I'm sending this because I would love to work for ya and help out with ${offer}. Whether that's writing copy, taking calls, etc.\n\nI wanna prove you that I'd be able to help so I wrote a ${copy} for you.\n\nhere's the link, hopefully it helps: ${doc || '(Google Doc link)'}\n\nIf you like that, I'd love to write some more ${copy} for free on a trial basis, or I can write any other type of copy you need — just shoot me a reply.\n\ntalk soon\n\n(reply "not interested" to unsub from my emails)`,
+      followup: `hey ${name}, just checking to see if you still wanted those ${copy}, just let me know ^`,
+      giving: null,
+    },
+  };
+}
+
+function filterKeys(scripts, plat, sType) {
+  return Object.keys(scripts).filter(key => {
+    const isIG = key.startsWith('ig'), isEmail = key.startsWith('email');
+    const isBE = key.includes('backend'), isFE = key.includes('frontend');
+    const platOk = plat === 'both' || (plat === 'ig' && isIG) || (plat === 'email' && isEmail);
+    const scriptOk = sType === 'both' || (sType === 'backend' && isBE) || (sType === 'frontend' && isFE);
+    return platOk && scriptOk;
+  });
+}
+
+function generate() {
+  const name = document.getElementById('firstName').value.trim();
+  const offer = document.getElementById('offerName').value.trim();
+  const doc = document.getElementById('docLink').value.trim();
+  if (!name || !offer || !copyType) { alert('Please fill in name, offer, and select a copy type.'); return; }
+  currentScripts = buildScripts(name, offer, copyType, doc);
+  currentMeta = { name, offer, copy: copyType, doc };
+  renderStep2(filterKeys(currentScripts, platform, scriptType));
+  document.getElementById('saveNameLabel').textContent = name;
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+}
+
+function renderStep2(keys) {
+  const tabRow = document.getElementById('tabRow');
+  const tabContents = document.getElementById('tabContents');
+  tabRow.innerHTML = ''; tabContents.innerHTML = '';
+  keys.forEach((key, i) => {
+    const s = currentScripts[key];
+    const tab = document.createElement('button');
+    tab.className = 'tab' + (i === 0 ? ' active' : '');
+    tab.textContent = s.label; tab.onclick = () => switchTab(key); tab.id = 'tab-' + key;
+    tabRow.appendChild(tab);
+    const content = document.createElement('div');
+    content.className = 'tab-content' + (i === 0 ? ' active' : '');
+    content.id = 'content-' + key;
+    let html = `<p class="note" style="margin-bottom:12px;">${s.note}</p>`;
+    if (s.subject) html += `<p class="subject-line">Subject: <span>${s.subject}</span></p>`;
+    html += `<div class="section-label">Initial message <button class="pill copy-btn" onclick="copyEl('main-${key}',this)">Copy</button></div>`;
+    html += `<div class="output-box" id="main-${key}">${s.main}</div>`;
+    html += `<hr class="divider">`;
+    html += `<div class="section-label">Follow-up <button class="pill copy-btn" onclick="copyEl('fu-${key}',this)">Copy</button></div>`;
+    html += `<div class="output-box" id="fu-${key}">${s.followup}</div>`;
+    if (s.giving) {
+      html += `<hr class="divider">`;
+      html += `<div class="section-label">Sending the copy <button class="pill copy-btn" onclick="copyEl('giving-${key}',this)">Copy</button></div>`;
+      html += `<div class="output-box" id="giving-${key}">${s.giving}</div>`;
+    }
+    content.innerHTML = html;
+    tabContents.appendChild(content);
+  });
+}
+
+function saveToQueue() {
+  const keys = filterKeys(currentScripts, platform, scriptType);
+  const entry = { meta: { ...currentMeta }, scripts: {} };
+  keys.forEach(k => { entry.scripts[k] = currentScripts[k]; });
+  queue.push(entry); updateQueueCount(); renderQueue();
+  const btn = document.querySelector('.save-bar button');
+  btn.textContent = 'Saved!';
+  setTimeout(() => { btn.textContent = '+ Save to queue'; }, 1500);
+}
+
+function updateQueueCount() { document.getElementById('queueCount').textContent = queue.length; }
+
+function renderQueue() {
+  const list = document.getElementById('queueList');
+  if (!queue.length) { list.innerHTML = '<div class="empty-state">No messages saved yet.</div>'; return; }
+  list.innerHTML = queue.map((entry, idx) => {
+    const keys = Object.keys(entry.scripts);
+    let html = `<div class="queue-item"><div class="queue-item-header"><div><div class="queue-item-title">${entry.meta.name} — ${entry.meta.offer}</div><div class="queue-item-meta">${entry.meta.copy}</div></div><button class="pill danger" style="font-size:12px;padding:3px 10px;" onclick="removeFromQueue(${idx})">Remove</button></div>`;
+    keys.forEach(k => {
+      const s = entry.scripts[k];
+      html += `<div style="margin-bottom:12px;">`;
+      html += `<div class="queue-msg-label">${s.label} <span class="badge">${s.note}</span> <button class="pill copy-btn" onclick="copyEl('q-main-${idx}-${k}',this)" style="margin-left:auto;">Copy</button></div>`;
+      if (s.subject) html += `<div class="subject-line" style="margin-bottom:5px;">Subject: <span>${s.subject}</span></div>`;
+      html += `<div class="queue-msg" id="q-main-${idx}-${k}">${s.main}</div>`;
+      html += `<div class="queue-msg-label" style="margin-top:8px;">Follow-up <button class="pill copy-btn" onclick="copyEl('q-fu-${idx}-${k}',this)" style="margin-left:auto;">Copy</button></div>`;
+      html += `<div class="queue-msg" id="q-fu-${idx}-${k}">${s.followup}</div>`;
+      if (s.giving) {
+        html += `<div class="queue-msg-label" style="margin-top:8px;">Sending the copy <button class="pill copy-btn" onclick="copyEl('q-giving-${idx}-${k}',this)" style="margin-left:auto;">Copy</button></div>`;
+        html += `<div class="queue-msg" id="q-giving-${idx}-${k}">${s.giving}</div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+    return html;
+  }).join('');
+}
+
+function removeFromQueue(idx) { queue.splice(idx, 1); updateQueueCount(); renderQueue(); }
+function clearQueue() { if (!queue.length) return; queue = []; updateQueueCount(); renderQueue(); }
+
+function copyAll() {
+  if (!queue.length) return;
+  let all = '';
+  queue.forEach(entry => {
+    all += `========================================\n${entry.meta.name.toUpperCase()} — ${entry.meta.offer}\n${entry.meta.copy}\n========================================\n\n`;
+    Object.keys(entry.scripts).forEach(k => {
+      const s = entry.scripts[k];
+      all += `--- ${s.label} ---\n`;
+      if (s.subject) all += `Subject: ${s.subject}\n\n`;
+      all += `[Initial message]\n${s.main}\n\n[Follow-up]\n${s.followup}\n\n`;
+      if (s.giving) all += `[Sending the copy]\n${s.giving}\n\n`;
+    });
+    all += '\n';
+  });
+  navigator.clipboard.writeText(all.trim()).then(() => {
+    const btn = document.getElementById('copyAllBtn');
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy all'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function switchTab(key) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + key).classList.add('active');
+  document.getElementById('content-' + key).classList.add('active');
+}
+
+function copyEl(id, btn) {
+  const el = document.getElementById(id); if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    btn.textContent = 'Copied'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function back() { document.getElementById('step2').classList.remove('active'); document.getElementById('step1').classList.add('active'); }
+
+function resetForm() {
+  document.getElementById('firstName').value = '';
+  document.getElementById('offerName').value = '';
+  document.getElementById('docLink').value = '';
+  copyType = '';
+  document.querySelectorAll('#copyPills .pill').forEach(x => x.classList.remove('selected'));
+  document.querySelectorAll('#platformPills .pill').forEach(x => x.classList.remove('selected'));
+  document.querySelector('#platformPills .pill[data-val="both"]').classList.add('selected');
+  document.querySelectorAll('#scriptPills .pill').forEach(x => x.classList.remove('selected'));
+  document.querySelector('#scriptPills .pill[data-val="both"]').classList.add('selected');
+  platform = 'both'; scriptType = 'both';
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+}
+</script>
+    </div>
+
+    <!-- EMAIL BOT -->
+    <div class="bot-pane" id="pane-email">
+      <div class="page">
+
+  <div class="header">
+    <div class="logo-mark">[C<span class="two">2</span>C]</div>
+    <div class="header-tag">Email Bot</div>
+  </div>
+
+  <!-- EMAIL TYPE -->
+  <div class="type-label">01 — Email Type</div>
+  <div class="type-grid" id="typeGrid">
+    <div class="type-btn active" data-type="Value">Value</div>
+    <div class="type-btn" data-type="Story">Story</div>
+    <div class="type-btn" data-type="Discovery">Discovery</div>
+    <div class="type-btn" data-type="Testimonial">Testimonial</div>
+    <div class="type-btn" data-type="New Offer">New Offer</div>
+  </div>
+
+  <div class="type-desc visible" id="typeDesc">
+    <div class="type-desc-title" id="typeDescTitle">Value Email</div>
+    <div class="type-desc-body" id="typeDescBody">Teaches something useful, builds trust, and keeps the list warm. No hard sell — the value IS the content. Ends with a soft CTA or none at all.</div>
+  </div>
+
+  <!-- CORE INPUTS -->
+  <div class="type-label" style="margin-bottom:10px;">02 — Inputs</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Client / Brand</label>
+      <input type="text" id="brand" placeholder="e.g. Rohn Starling, Drip City Coffee">
+    </div>
+    <div class="field">
+      <label>Audience</label>
+      <input type="text" id="audience" placeholder="e.g. Online coaches, course creators">
+    </div>
+    <div class="field full">
+      <label>Offer / Product</label>
+      <input type="text" id="offer" placeholder="What are they selling? Include price if relevant.">
+    </div>
+    <div class="field full">
+      <label>Voice Sample <span style="color:#555;font-size:9px;">(paste real writing from the brand)</span></label>
+      <textarea id="voice" class="tall" placeholder="Paste an email, caption, or post. This is the most important input — without it the copy sounds generic."></textarea>
+    </div>
+
+    <!-- VALUE FIELDS -->
+    <div class="field full dynamic-field visible" id="field-value-topic">
+      <label>Value Topic / Lesson</label>
+      <textarea id="valueTopic" placeholder="What insight, tip, or lesson does this email teach? Be specific."></textarea>
+    </div>
+
+    <!-- STORY FIELDS -->
+    <div class="field full dynamic-field" id="field-story-narrative">
+      <label>The Story</label>
+      <textarea id="storyNarrative" placeholder="What happened? Describe the situation, the turning point, and the lesson. Raw is fine."></textarea>
+    </div>
+
+    <!-- DISCOVERY FIELDS -->
+    <div class="field full dynamic-field" id="field-discovery">
+      <label>The Discovery / Insight</label>
+      <textarea id="discoveryInsight" placeholder="What did they discover, realize, or find out? What changed their thinking?"></textarea>
+    </div>
+
+    <!-- TESTIMONIAL FIELDS -->
+    <div class="field full dynamic-field" id="field-testimonial">
+      <label>Testimonial / Result</label>
+      <textarea id="testimonialText" placeholder="Paste the testimonial or describe the result. Include names, numbers, specifics."></textarea>
+    </div>
+
+    <!-- NEW OFFER FIELDS -->
+    <div class="field full dynamic-field" id="field-offer-detail">
+      <label>Offer Details</label>
+      <textarea id="offerDetail" placeholder="What's the offer? Price, what's included, deadline or scarcity, who it's for."></textarea>
+    </div>
+
+    <!-- SHARED -->
+    <div class="field full">
+      <label>CTA</label>
+      <input type="text" id="cta" placeholder="What should the reader do? e.g. Reply, click, book a call, buy now">
+    </div>
+    <div class="field full">
+      <label>Proof / Results <span style="color:#555;font-size:9px;">(optional but powerful)</span></label>
+      <textarea id="proof" placeholder="Numbers, testimonials, results, credentials..."></textarea>
+    </div>
+    <div class="field">
+      <label>Length</label>
+      <select id="length">
+        <option value="Short (75–100 words)">Short — 75–100 words</option>
+        <option value="Medium (100–200 words)" selected>Medium — 100–200 words</option>
+        <option value="Long (300+ words)">Long — 300+ words</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Constraints</label>
+      <input type="text" id="constraints" placeholder="Banned words, tone limits, platform rules...">
+    </div>
+  </div>
+
+  <!-- SLIDERS -->
+  <div class="slider-row">
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Awareness Level</span>
+        <span class="slider-val" id="awarVal">3</span>
+      </div>
+      <span class="slider-desc" id="awarDesc">Solution aware</span>
+      <input type="range" min="1" max="5" value="3" id="awareness">
+    </div>
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Sophistication Level</span>
+        <span class="slider-val" id="sophVal">2</span>
+      </div>
+      <span class="slider-desc" id="sophDesc">Seen some offers</span>
+      <input type="range" min="1" max="5" value="2" id="sophistication">
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="gen-row">
+    <button class="btn-gen" id="genBtn" onclick="generate()">WRITE EMAIL</button>
+    <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+    <div class="spinner" id="spinner"></div>
+    <span class="status" id="status"></span>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output" id="output">
+    <div class="output-header">
+      <div class="out-label">Output</div>
+      <button class="btn-copy" onclick="copyAll()">COPY EMAIL</button>
+    </div>
+    <div class="out-tabs">
+      <div class="out-tab active" onclick="switchTab('email')">Email</div>
+      <div class="out-tab" onclick="switchTab('subjects')">Subject Lines</div>
+      <div class="out-tab" onclick="switchTab('rubric')">Rubric</div>
+      <div class="out-tab" onclick="switchTab('variant')">A/B Variant</div>
+    </div>
+    <div class="out-block">
+      <div class="tab-pane active" id="tab-email">
+        <div class="out-section">
+          <div class="out-section-title">Subject Line</div>
+          <div class="out-text" id="out-subject"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Preheader</div>
+          <div class="out-text" id="out-preheader"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Body</div>
+          <div class="out-text" id="out-body"></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab-subjects">
+        <div class="out-section">
+          <div class="out-section-title">5 Subject Line Options</div>
+          <div id="out-subjects"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">5 CTA Options</div>
+          <div class="out-mono" id="out-ctas"></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab-rubric">
+        <div class="out-section">
+          <div class="out-section-title">Scores</div>
+          <div id="out-scores"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Strengths</div>
+          <div class="out-text" id="out-strengths"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Improvements</div>
+          <div class="out-text" id="out-improvements"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Why It Works</div>
+          <div class="out-text" id="out-rationale"></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab-variant">
+        <div class="out-section">
+          <div class="out-section-title">A/B Variant</div>
+          <div class="out-text" id="out-variant-note"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Variant Subject</div>
+          <div class="out-text" id="out-variant-subject"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Variant Body</div>
+          <div class="out-text" id="out-variant-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const typeDescs = {
+  "Value": {
+    title: "Value Email",
+    body: "Teaches something useful, builds trust, and keeps the list warm. No hard sell — the value IS the content. Ends with a soft CTA or none at all."
+  },
+  "Story": {
+    title: "Story Email",
+    body: "Uses a personal or client story to create connection and lead into a lesson or offer. The story IS the hook. Emotion first, point second."
+  },
+  "Discovery": {
+    title: "Discovery Email",
+    body: "Shares a realization, insight, or 'aha moment' the reader hasn't heard before. Contrarian angles work well here. Challenges a false belief and replaces it."
+  },
+  "Testimonial": {
+    title: "Testimonial Email",
+    body: "Leads with a real result or client win to build social proof and desire. The testimonial does the selling — the copy frames and amplifies it."
+  },
+  "New Offer": {
+    title: "New Offer Email",
+    body: "Announces and sells a new product, service, or program. Direct, urgent, and CTA-heavy. Proof and mechanism are critical. This one is built to convert."
+  }
+};
+
+const awarDescs = ['Unaware of problem','Problem aware','Solution aware','Product aware','Ready to buy'];
+const sophDescs = ['Fresh market','Seen some offers','Multiple solutions','Skeptical','Maximum skepticism'];
+
+const dynamicFields = {
+  "Value": ["field-value-topic"],
+  "Story": ["field-story-narrative"],
+  "Discovery": ["field-discovery"],
+  "Testimonial": ["field-testimonial"],
+  "New Offer": ["field-offer-detail"],
+};
+
+let currentType = "Value";
+
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+
+    document.getElementById('typeDescTitle').textContent = typeDescs[currentType].title;
+    document.getElementById('typeDescBody').textContent = typeDescs[currentType].body;
+    document.getElementById('typeDesc').classList.add('visible');
+
+    document.querySelectorAll('.dynamic-field').forEach(f => f.classList.remove('visible'));
+    (dynamicFields[currentType] || []).forEach(id => {
+      document.getElementById(id)?.classList.add('visible');
+    });
+  });
+});
+
+document.getElementById('awareness').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('awarVal').textContent = v;
+  document.getElementById('awarDesc').textContent = awarDescs[v-1];
+});
+
+document.getElementById('sophistication').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('sophVal').textContent = v;
+  document.getElementById('sophDesc').textContent = sophDescs[v-1];
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function getTypeSpecific() {
+  const map = {
+    "Value": document.getElementById('valueTopic')?.value || '',
+    "Story": document.getElementById('storyNarrative')?.value || '',
+    "Discovery": document.getElementById('discoveryInsight')?.value || '',
+    "Testimonial": document.getElementById('testimonialText')?.value || '',
+    "New Offer": document.getElementById('offerDetail')?.value || '',
+  };
+  return map[currentType] || '';
+}
+
+function getTypeSpecificLabel() {
+  const map = {
+    "Value": "Value Topic/Lesson",
+    "Story": "The Story",
+    "Discovery": "The Discovery/Insight",
+    "Testimonial": "Testimonial/Result",
+    "New Offer": "Offer Details",
+  };
+  return map[currentType];
+}
+
+function buildPrompt() {
+  const typeInstructions = {
+    "Value": "Write a VALUE email. Goal: teach one specific, actionable insight that makes the reader smarter. No hard sell. Soft CTA or none. The value IS the content. Open with a bold statement or question. Close with practical application.",
+    "Story": "Write a STORY email. Goal: use a personal or client story to create emotional connection, then draw out a lesson or lead to the offer. Hook with the story mid-scene. Emotion first. Point second. CTA last.",
+    "Discovery": "Write a DISCOVERY email. Goal: share a contrarian insight or 'aha moment' the reader hasn't considered. Challenge a false belief directly. Replace it with a new frame. Build to a soft or hard CTA depending on awareness level.",
+    "Testimonial": "Write a TESTIMONIAL email. Goal: lead with a specific, credible client result or win. Let the result do the selling. Frame it with context (who they were before, what changed, what happened). Close with CTA tied to that outcome.",
+    "New Offer": "Write a NEW OFFER email. Goal: announce and sell. Be direct about what it is, who it's for, what they get, and why now. Proof and urgency are critical. This email is built to convert — CTA should be clear and repeated.",
+  };
+
+  return `You are a world-class direct response copywriter writing for a client's email list. Respond ONLY with valid JSON. No markdown, no backticks, no preamble.
+
+EMAIL TYPE: ${currentType}
+INSTRUCTION: ${typeInstructions[currentType]}
+
+INPUTS:
+- Client/Brand: ${document.getElementById('brand').value || 'Not specified'}
+- Audience: ${document.getElementById('audience').value || 'Not specified'}
+- Offer/Product: ${document.getElementById('offer').value || 'Not specified'}
+- Voice Sample: ${document.getElementById('voice').value || 'Not provided — use a direct, conversational tone'}
+- ${getTypeSpecificLabel()}: ${getTypeSpecific() || 'Not specified'}
+- CTA: ${document.getElementById('cta').value || 'Not specified'}
+- Proof/Results: ${document.getElementById('proof').value || 'None provided'}
+- Length: ${document.getElementById('length').value}
+- Awareness Level: ${document.getElementById('awarVal').textContent}/5 (${awarDescs[parseInt(document.getElementById('awarVal').textContent)-1]})
+- Sophistication Level: ${document.getElementById('sophVal').textContent}/5 (${sophDescs[parseInt(document.getElementById('sophVal').textContent)-1]})
+- Constraints: ${document.getElementById('constraints').value || 'None'}
+
+Return this exact JSON:
+{
+  "subject": "Best subject line for this email",
+  "preheader": "Preheader text (40-90 chars, extends the subject line curiosity)",
+  "body": "Full email body. Match the voice sample closely. Use short paragraphs. Format for readability. Include the CTA naturally.",
+  "subject_lines": ["option 1", "option 2", "option 3", "option 4", "option 5"],
+  "cta_options": ["option 1", "option 2", "option 3", "option 4", "option 5"],
+  "scores": {
+    "subject_line": 0,
+    "preheader": 0,
+    "hook": 0,
+    "body": 0,
+    "proof": 0,
+    "flow": 0,
+    "cta_strength": 0,
+    "voice_fit": 0,
+    "overall": 0
+  },
+  "strengths": "3 specific strengths, each on its own line starting with a number",
+  "improvements": "3 specific improvements with example rewrites, each on its own line",
+  "rationale": "One sentence: why this email works for this audience at this awareness level",
+  "variant_note": "What element was changed for the A/B variant and why",
+  "variant_subject": "A/B variant subject line",
+  "variant_body": "A/B variant email body with one element changed (hook, CTA, or opening)"
+}
+
+All scores are integers 1–10. Be honest — if it's weak, say so.`;
+}
+
+async function generate() {
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('spinner');
+  const status = document.getElementById('status');
+
+  if (!document.getElementById('audience').value && !document.getElementById('brand').value) {
+    status.textContent = 'Add at least a brand and audience.';
+    return;
+  }
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  status.textContent = 'Writing...';
+  document.getElementById('output').classList.remove('visible');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: buildPrompt() }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const d = JSON.parse(clean);
+
+    // EMAIL TAB
+    document.getElementById('out-subject').textContent = d.subject || '';
+    document.getElementById('out-preheader').textContent = d.preheader || '';
+    document.getElementById('out-body').textContent = d.body || '';
+
+    // SUBJECTS TAB
+    const subjectsEl = document.getElementById('out-subjects');
+    subjectsEl.innerHTML = '';
+    (d.subject_lines || []).forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'subject-line';
+      div.textContent = s;
+      subjectsEl.appendChild(div);
+    });
+    document.getElementById('out-ctas').textContent = (d.cta_options || []).map((c,i) => `${i+1}. ${c}`).join('\n');
+
+    // RUBRIC TAB
+    const scoreLabels = {
+      subject_line: 'Subject Line', preheader: 'Preheader', hook: 'Hook',
+      body: 'Body', proof: 'Proof', flow: 'Flow',
+      cta_strength: 'CTA Strength', voice_fit: 'Voice Fit', overall: 'OVERALL'
+    };
+    const scoresEl = document.getElementById('out-scores');
+    scoresEl.innerHTML = '';
+    Object.entries(scoreLabels).forEach(([k, label]) => {
+      const v = d.scores?.[k] || 0;
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      if (k === 'overall') row.style.marginTop = '12px';
+      row.innerHTML = `
+        <div class="score-name" style="${k==='overall'?'color:#f0f0f0;':'}'}">${label}</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${v*10}%"></div></div>
+        <div class="score-num">${v}</div>`;
+      scoresEl.appendChild(row);
+    });
+    document.getElementById('out-strengths').textContent = d.strengths || '';
+    document.getElementById('out-improvements').textContent = d.improvements || '';
+    document.getElementById('out-rationale').textContent = d.rationale || '';
+
+    // VARIANT TAB
+    document.getElementById('out-variant-note').textContent = d.variant_note || '';
+    document.getElementById('out-variant-subject').textContent = d.variant_subject || '';
+    document.getElementById('out-variant-body').textContent = d.variant_body || '';
+
+    document.getElementById('output').classList.add('visible');
+    switchTab('email');
+    status.textContent = '✓ Done';
+    setTimeout(() => status.textContent = '', 3000);
+  } catch(err) {
+    console.error(err);
+    status.textContent = 'Error — check inputs and try again.';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function copyAll() {
+  const subject = document.getElementById('out-subject').textContent;
+  const preheader = document.getElementById('out-preheader').textContent;
+  const body = document.getElementById('out-body').textContent;
+  const text = `Subject: ${subject}\nPreheader: ${preheader}\n\n${body}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIED!';
+    setTimeout(() => btn.textContent = 'COPY EMAIL', 2000);
+  });
+}
+
+function clearAll() {
+  ['brand','audience','offer','voice','cta','proof','constraints','valueTopic','storyNarrative','discoveryInsight','testimonialText','offerDetail'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('awareness').value = 3;
+  document.getElementById('awarVal').textContent = 3;
+  document.getElementById('awarDesc').textContent = awarDescs[2];
+  document.getElementById('sophistication').value = 2;
+  document.getElementById('sophVal').textContent = 2;
+  document.getElementById('sophDesc').textContent = sophDescs[1];
+  document.getElementById('output').classList.remove('visible');
+  document.getElementById('status').textContent = '';
+}
+</script>
+    </div>
+
+    <!-- SHORTFORM BOT -->
+    <div class="bot-pane" id="pane-shortform">
+      <div class="page">
+
+  <div class="header">
+    <div class="logo-mark">[C<span class="two">2</span>C]</div>
+    <div class="header-tag">Short-Form Script Bot</div>
+  </div>
+
+  <!-- SCRIPT TYPE -->
+  <div class="section-label">01 — Script Type</div>
+  <div class="type-grid" id="typeGrid">
+    <div class="type-btn active" data-type="Educational">Educational</div>
+    <div class="type-btn" data-type="Story">Story</div>
+    <div class="type-btn" data-type="Polarizing">Polarizing</div>
+  </div>
+
+  <div class="type-desc" id="typeDesc">
+    <div class="type-desc-title" id="typeDescTitle">Educational Script</div>
+    <div class="type-desc-body" id="typeDescBody">Teaches one specific insight, tip, or framework in a way that makes the viewer feel smarter. Hook → teach → apply. Ends with a soft CTA or engagement question.</div>
+  </div>
+
+  <!-- PLATFORM -->
+  <div class="section-label">02 — Platform</div>
+  <div class="platform-grid" id="platformGrid">
+    <div class="plat-btn active" data-plat="TikTok">TikTok</div>
+    <div class="plat-btn" data-plat="Instagram Reels">IG Reels</div>
+    <div class="plat-btn" data-plat="YouTube Shorts">YT Shorts</div>
+  </div>
+
+  <!-- DURATION -->
+  <div class="section-label">03 — Duration</div>
+  <div class="duration-grid" id="durationGrid">
+    <div class="dur-btn active" data-dur="15–30 seconds">15–30s</div>
+    <div class="dur-btn" data-dur="30–60 seconds">30–60s</div>
+    <div class="dur-btn" data-dur="60–90 seconds">60–90s</div>
+    <div class="dur-btn" data-dur="90+ seconds">90s+</div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="section-label">04 — Inputs</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Client / Brand</label>
+      <input type="text" id="brand" placeholder="e.g. Rohn Starling, @kennethikuti">
+    </div>
+    <div class="field">
+      <label>Audience</label>
+      <input type="text" id="audience" placeholder="e.g. Online coaches, course creators">
+    </div>
+    <div class="field full">
+      <label>Voice / Vibe Sample <span style="color:#555;font-size:9px;">(paste a caption, script, or how they talk)</span></label>
+      <textarea id="voice" class="tall" placeholder="How does this creator talk? Paste something real. This is the most important input."></textarea>
+    </div>
+
+    <!-- EDUCATIONAL FIELDS -->
+    <div class="field full dynamic-field visible" id="field-edu-topic">
+      <label>Topic / Lesson</label>
+      <textarea id="eduTopic" placeholder="What's the one thing this video teaches? Be specific — vague topics make weak scripts."></textarea>
+    </div>
+
+    <!-- STORY FIELDS -->
+    <div class="field full dynamic-field" id="field-story">
+      <label>The Story</label>
+      <textarea id="storyNarrative" placeholder="What happened? Situation → conflict → turning point → lesson. Raw is fine."></textarea>
+    </div>
+
+    <!-- POLARIZING FIELDS -->
+    <div class="field full dynamic-field" id="field-polarizing">
+      <label>The Take / Controversial Angle</label>
+      <textarea id="polarizingTake" placeholder="What's the hot take, unpopular opinion, or contrarian belief? What will make half the audience nod and half push back?"></textarea>
+    </div>
+
+    <div class="field full">
+      <label>Offer / What You're Promoting <span style="color:#555;font-size:9px;">(optional)</span></label>
+      <input type="text" id="offer" placeholder="What are they selling or promoting? Leave blank for pure content.">
+    </div>
+    <div class="field">
+      <label>CTA</label>
+      <input type="text" id="cta" placeholder="e.g. Follow, comment, DM, link in bio">
+    </div>
+    <div class="field">
+      <label>Constraints</label>
+      <input type="text" id="constraints" placeholder="Anything off-limits, tone limits, platform rules...">
+    </div>
+  </div>
+
+  <!-- AWARENESS SLIDER -->
+  <div class="slider-row">
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Audience Awareness</span>
+        <span class="slider-val" id="awarVal">3</span>
+      </div>
+      <span class="slider-desc" id="awarDesc">Solution aware</span>
+      <input type="range" min="1" max="5" value="3" id="awareness">
+    </div>
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Sophistication</span>
+        <span class="slider-val" id="sophVal">2</span>
+      </div>
+      <span class="slider-desc" id="sophDesc">Seen some offers</span>
+      <input type="range" min="1" max="5" value="2" id="sophistication">
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="gen-row">
+    <button class="btn-gen" id="genBtn" onclick="generate()">WRITE SCRIPT</button>
+    <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+    <div class="spinner" id="spinner"></div>
+    <span class="status" id="status"></span>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output" id="output">
+    <div class="output-header">
+      <div class="out-label">Output</div>
+      <button class="btn-copy" onclick="copyScript()">COPY SCRIPT</button>
+    </div>
+    <div class="out-tabs">
+      <div class="out-tab active" onclick="switchTab('script')">Script</div>
+      <div class="out-tab" onclick="switchTab('hooks')">Hook Options</div>
+      <div class="out-tab" onclick="switchTab('caption')">Caption</div>
+      <div class="out-tab" onclick="switchTab('rubric')">Rubric</div>
+    </div>
+    <div class="out-block">
+
+      <div class="tab-pane active" id="tab-script">
+        <div class="out-section">
+          <div class="out-section-title">Full Script</div>
+          <div class="script-lines" id="out-script"></div>
+        </div>
+        <div class="out-section" style="margin-top:20px;">
+          <div class="out-section-title">Director Notes</div>
+          <div class="out-text" id="out-notes"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-hooks">
+        <div class="out-section">
+          <div class="out-section-title">Hook Options (Pick One)</div>
+          <div id="out-hooks"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Top Pick + Rationale</div>
+          <div class="out-text" id="out-hook-rationale"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-caption">
+        <div class="out-section">
+          <div class="out-section-title">Caption</div>
+          <div class="out-text" id="out-caption"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Hashtags</div>
+          <div class="out-mono" id="out-hashtags"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-rubric">
+        <div class="out-section">
+          <div class="out-section-title">Scores</div>
+          <div id="out-scores"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Strengths</div>
+          <div class="out-text" id="out-strengths"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Improvements</div>
+          <div class="out-text" id="out-improvements"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Why It Works</div>
+          <div class="out-text" id="out-rationale"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const typeDescs = {
+  "Educational": {
+    title: "Educational Script",
+    body: "Teaches one specific insight, tip, or framework in a way that makes the viewer feel smarter. Hook → teach → apply. Ends with a soft CTA or engagement question."
+  },
+  "Story": {
+    title: "Story Script",
+    body: "Uses a personal moment or experience to pull the viewer in emotionally. Hook mid-scene → tension → turning point → lesson. The story IS the content."
+  },
+  "Polarizing": {
+    title: "Polarizing Script",
+    body: "Takes a hot take or contrarian stance that makes half the audience nod and the other half push back. Designed to drive comments, shares, and saves. High retention, high engagement."
+  }
+};
+
+const awarDescs = ['Unaware of problem','Problem aware','Solution aware','Product aware','Ready to buy'];
+const sophDescs = ['Fresh market','Seen some offers','Multiple solutions','Skeptical','Maximum skepticism'];
+
+const dynamicFields = {
+  "Educational": ["field-edu-topic"],
+  "Story": ["field-story"],
+  "Polarizing": ["field-polarizing"],
+};
+
+let currentType = "Educational";
+let currentPlatform = "TikTok";
+let currentDuration = "15–30 seconds";
+
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+    document.getElementById('typeDescTitle').textContent = typeDescs[currentType].title;
+    document.getElementById('typeDescBody').textContent = typeDescs[currentType].body;
+    document.querySelectorAll('.dynamic-field').forEach(f => f.classList.remove('visible'));
+    (dynamicFields[currentType] || []).forEach(id => document.getElementById(id)?.classList.add('visible'));
+  });
+});
+
+document.querySelectorAll('.plat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.plat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPlatform = btn.dataset.plat;
+  });
+});
+
+document.querySelectorAll('.dur-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDuration = btn.dataset.dur;
+  });
+});
+
+document.getElementById('awareness').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('awarVal').textContent = v;
+  document.getElementById('awarDesc').textContent = awarDescs[v-1];
+});
+
+document.getElementById('sophistication').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('sophVal').textContent = v;
+  document.getElementById('sophDesc').textContent = sophDescs[v-1];
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function getTypeSpecific() {
+  const vals = {
+    "Educational": document.getElementById('eduTopic')?.value || '',
+    "Story": document.getElementById('storyNarrative')?.value || '',
+    "Polarizing": document.getElementById('polarizingTake')?.value || '',
+  };
+  return vals[currentType] || '';
+}
+
+function getTypeSpecificLabel() {
+  return { "Educational": "Topic/Lesson", "Story": "The Story", "Polarizing": "The Take/Angle" }[currentType];
+}
+
+function buildPrompt() {
+  const typeInstructions = {
+    "Educational": `Write an EDUCATIONAL short-form script. Goal: teach ONE specific, actionable insight that makes the viewer feel immediately smarter. Structure: bold hook that stops the scroll → clear setup of the problem or question → teach the insight in simple steps → apply it or show why it matters → CTA. Every sentence must earn its place. Cut anything that doesn't teach or move the viewer forward.`,
+    "Story": `Write a STORY short-form script. Goal: pull the viewer into a real moment emotionally. Structure: open IN the scene (not before it) → build tension through the conflict → hit the turning point → extract the lesson → soft CTA. The first line must drop them mid-scene. No "so today I want to talk about" openers. Emotion first, point second.`,
+    "Polarizing": `Write a POLARIZING short-form script. Goal: take a clear, specific stance that creates immediate "yes or no" reactions. Structure: state the take boldly in the first 2-3 seconds → back it up with logic or experience → anticipate and dismantle the pushback → land the point → engagement CTA (ask them to agree/disagree). This should make people COMMENT. Avoid being offensive — be provocative, not harmful.`,
+  };
+
+  return `You are a world-class short-form content strategist and scriptwriter. Respond ONLY with valid JSON. No markdown, no backticks, no preamble.
+
+SCRIPT TYPE: ${currentType}
+PLATFORM: ${currentPlatform}
+DURATION: ${currentDuration}
+INSTRUCTION: ${typeInstructions[currentType]}
+
+INPUTS:
+- Brand/Creator: ${document.getElementById('brand').value || 'Not specified'}
+- Audience: ${document.getElementById('audience').value || 'Not specified'}
+- Voice/Vibe Sample: ${document.getElementById('voice').value || 'Not provided — use punchy, direct, conversational tone'}
+- ${getTypeSpecificLabel()}: ${getTypeSpecific() || 'Not specified'}
+- Offer (if any): ${document.getElementById('offer').value || 'None — pure content'}
+- CTA: ${document.getElementById('cta').value || 'Follow for more'}
+- Constraints: ${document.getElementById('constraints').value || 'None'}
+- Awareness Level: ${document.getElementById('awarVal').textContent}/5 (${awarDescs[parseInt(document.getElementById('awarVal').textContent)-1]})
+- Sophistication Level: ${document.getElementById('sophVal').textContent}/5 (${sophDescs[parseInt(document.getElementById('sophVal').textContent)-1]})
+
+Return this exact JSON:
+{
+  "script": [
+    { "tag": "HOOK", "line": "Opening line — must stop the scroll in under 3 seconds" },
+    { "tag": "SETUP", "line": "Context or tension that pulls them in" },
+    { "tag": "BODY", "line": "Main content — the lesson, story, or argument" },
+    { "tag": "LANDING", "line": "The point, lesson, or punchline" },
+    { "tag": "CTA", "line": "Call to action — what they should do next" }
+  ],
+  "director_notes": "2-3 sentences on HOW to film/deliver this. Energy level, pacing, camera angle, any visual cues.",
+  "hooks": [
+    { "type": "Curiosity", "line": "hook option" },
+    { "type": "Curiosity", "line": "hook option" },
+    { "type": "Benefit", "line": "hook option" },
+    { "type": "Benefit", "line": "hook option" },
+    { "type": "Provocative", "line": "hook option" },
+    { "type": "Provocative", "line": "hook option" },
+    { "type": "Pattern Interrupt", "line": "hook option" },
+    { "type": "Pattern Interrupt", "line": "hook option" }
+  ],
+  "hook_rationale": "Which hook is best for this type and audience and why in 2 sentences",
+  "caption": "Full caption for ${currentPlatform}. Match the voice sample. Include line breaks for readability. End with the CTA.",
+  "hashtags": "10-15 relevant hashtags as a single string",
+  "scores": {
+    "hook": 0,
+    "retention": 0,
+    "clarity": 0,
+    "voice_fit": 0,
+    "cta_strength": 0,
+    "platform_fit": 0,
+    "overall": 0
+  },
+  "strengths": "3 specific strengths, each on its own line starting with a number",
+  "improvements": "3 specific improvements with example rewrites, each on its own line",
+  "rationale": "One sentence: why this script works for this audience and platform"
+}
+
+All scores integers 1–10. Be honest.`;
+}
+
+async function generate() {
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('spinner');
+  const status = document.getElementById('status');
+
+  if (!document.getElementById('brand').value && !document.getElementById('audience').value) {
+    status.textContent = 'Add at least a brand and audience.';
+    return;
+  }
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  status.textContent = 'Writing...';
+  document.getElementById('output').classList.remove('visible');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: buildPrompt() }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const d = JSON.parse(clean);
+
+    // SCRIPT TAB
+    const scriptEl = document.getElementById('out-script');
+    scriptEl.innerHTML = '';
+    (d.script || []).forEach((line, i) => {
+      const row = document.createElement('div');
+      row.className = 'script-line';
+      row.innerHTML = `
+        <div class="line-tag">${line.tag}</div>
+        <div class="line-text ${i === 0 ? 'hook-text' : ''}">${line.line}</div>`;
+      scriptEl.appendChild(row);
+    });
+    document.getElementById('out-notes').textContent = d.director_notes || '';
+
+    // HOOKS TAB
+    const hooksEl = document.getElementById('out-hooks');
+    hooksEl.innerHTML = '';
+    (d.hooks || []).forEach(h => {
+      const div = document.createElement('div');
+      div.className = 'hook-card';
+      div.innerHTML = `<span class="hook-tag">${h.type}</span><div class="hook-text-block">${h.line}</div>`;
+      hooksEl.appendChild(div);
+    });
+    document.getElementById('out-hook-rationale').textContent = d.hook_rationale || '';
+
+    // CAPTION TAB
+    document.getElementById('out-caption').textContent = d.caption || '';
+    document.getElementById('out-hashtags').textContent = d.hashtags || '';
+
+    // RUBRIC TAB
+    const scoreLabels = {
+      hook: 'Hook', retention: 'Retention', clarity: 'Clarity',
+      voice_fit: 'Voice Fit', cta_strength: 'CTA Strength',
+      platform_fit: 'Platform Fit', overall: 'OVERALL'
+    };
+    const scoresEl = document.getElementById('out-scores');
+    scoresEl.innerHTML = '';
+    Object.entries(scoreLabels).forEach(([k, label]) => {
+      const v = d.scores?.[k] || 0;
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      if (k === 'overall') row.style.marginTop = '12px';
+      row.innerHTML = `
+        <div class="score-name">${label}</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${v*10}%"></div></div>
+        <div class="score-num">${v}</div>`;
+      scoresEl.appendChild(row);
+    });
+    document.getElementById('out-strengths').textContent = d.strengths || '';
+    document.getElementById('out-improvements').textContent = d.improvements || '';
+    document.getElementById('out-rationale').textContent = d.rationale || '';
+
+    document.getElementById('output').classList.add('visible');
+    switchTab('script');
+    status.textContent = '✓ Done';
+    setTimeout(() => status.textContent = '', 3000);
+
+  } catch(err) {
+    console.error(err);
+    status.textContent = 'Error — check inputs and try again.';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function copyScript() {
+  const lines = document.querySelectorAll('.script-line');
+  let text = '';
+  lines.forEach(l => {
+    const tag = l.querySelector('.line-tag').textContent;
+    const line = l.querySelector('.line-text').textContent;
+    text += `[${tag}]\n${line}\n\n`;
+  });
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIED!';
+    setTimeout(() => btn.textContent = 'COPY SCRIPT', 2000);
+  });
+}
+
+function clearAll() {
+  ['brand','audience','voice','offer','cta','constraints','eduTopic','storyNarrative','polarizingTake'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('awareness').value = 3;
+  document.getElementById('awarVal').textContent = 3;
+  document.getElementById('awarDesc').textContent = awarDescs[2];
+  document.getElementById('sophistication').value = 2;
+  document.getElementById('sophVal').textContent = 2;
+  document.getElementById('sophDesc').textContent = sophDescs[1];
+  document.getElementById('output').classList.remove('visible');
+  document.getElementById('status').textContent = '';
+}
+</script>
+    </div>
+
+    <!-- YOUTUBE BOT -->
+    <div class="bot-pane" id="pane-youtube">
+      <div class="page">
+
+  <div class="header">
+    <div class="logo-mark">[C<span class="two">2</span>C]</div>
+    <div class="header-tag">YouTube Bot</div>
+  </div>
+
+  <!-- MODE -->
+  <div class="section-label">01 — What Do You Need?</div>
+  <div class="mode-grid" id="modeGrid">
+    <div class="mode-btn active" data-mode="ideas">
+      <div class="mode-num">1</div>
+      <div>Ideas</div>
+    </div>
+    <div class="mode-btn" data-mode="titles">
+      <div class="mode-num">2</div>
+      <div>Titles + Hooks</div>
+    </div>
+    <div class="mode-btn" data-mode="outline">
+      <div class="mode-num">3</div>
+      <div>Outline</div>
+    </div>
+    <div class="mode-btn" data-mode="script">
+      <div class="mode-num">4</div>
+      <div>Full Script</div>
+    </div>
+  </div>
+
+  <div class="mode-desc" id="modeDesc">
+    <div class="mode-desc-title" id="modeDescTitle">Video Ideas</div>
+    <div class="mode-desc-body" id="modeDescBody">Generate 5 video ideas based on your niche, audience, and what's working in the market. Each idea includes a topic, angle, and why it will perform. Save the ones you like to use in the next steps.</div>
+  </div>
+
+  <!-- VIDEO TYPE -->
+  <div class="section-label">02 — Video Type</div>
+  <div class="type-grid" id="typeGrid">
+    <div class="type-btn active" data-type="Educational">Educational</div>
+    <div class="type-btn" data-type="Story / Vlog">Story / Vlog</div>
+    <div class="type-btn" data-type="Authority / Opinion">Authority</div>
+    <div class="type-btn" data-type="Case Study">Case Study</div>
+  </div>
+
+  <!-- SAVED IDEAS BANK -->
+  <div class="ideas-bank" id="ideasBank" style="display:none;">
+    <div class="ideas-bank-label">Saved Ideas — click to use in Title / Outline / Script mode</div>
+    <div class="idea-pills" id="ideaPills"></div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="section-label">03 — Inputs</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Channel / Creator</label>
+      <input type="text" id="brand" placeholder="e.g. Rohn Starling, @kennethikuti">
+    </div>
+    <div class="field">
+      <label>Audience</label>
+      <input type="text" id="audience" placeholder="e.g. Online coaches, athletes, course creators">
+    </div>
+    <div class="field full">
+      <label>Niche / Content Focus</label>
+      <input type="text" id="niche" placeholder="e.g. Mental performance, content creation, fitness coaching">
+    </div>
+
+    <!-- MODE 1 — IDEAS -->
+    <div class="field full dynamic-section visible" id="mode-ideas-input">
+      <label>What's working in the market right now? <span style="color:#555;font-size:9px;">(optional — paste competitors, trending topics, angles you've seen)</span></label>
+      <textarea id="marketInsights" placeholder="e.g. 'My niche is blowing up around AI content tools. Competitors are doing a lot of tutorials and reaction content...'"></textarea>
+    </div>
+
+    <!-- MODE 2 — TITLES -->
+    <div class="field full dynamic-section" id="mode-titles-input">
+      <label>Video Topic / Idea</label>
+      <textarea id="titleTopic" placeholder="Paste a saved idea or describe the video topic you want titles for."></textarea>
+    </div>
+
+    <!-- MODE 3 — OUTLINE -->
+    <div class="field full dynamic-section" id="mode-outline-input">
+      <label>Video Topic + Angle</label>
+      <textarea id="outlineTopic" placeholder="Paste a saved idea or the topic + angle for this video."></textarea>
+    </div>
+
+    <!-- MODE 4 — FULL SCRIPT -->
+    <div class="field full dynamic-section" id="mode-script-input">
+      <label>Video Topic + Angle</label>
+      <textarea id="scriptTopic" placeholder="Paste a saved idea or describe what this video is about."></textarea>
+    </div>
+
+    <div class="field full">
+      <label>Voice / Style Sample <span style="color:#555;font-size:9px;">(paste how they talk — a transcript snippet, caption, or description)</span></label>
+      <textarea id="voice" class="tall" placeholder="How does this creator talk on camera? Casual? Authoritative? Fast-paced? Paste something real."></textarea>
+    </div>
+    <div class="field">
+      <label>Offer / CTA <span style="color:#555;font-size:9px;">(optional)</span></label>
+      <input type="text" id="cta" placeholder="e.g. Free audit, link in bio, subscribe, DM me">
+    </div>
+    <div class="field">
+      <label>Video Length Target</label>
+      <select id="vidLength">
+        <option value="5–8 minutes">5–8 min</option>
+        <option value="8–12 minutes" selected>8–12 min</option>
+        <option value="12–20 minutes">12–20 min</option>
+        <option value="20+ minutes">20+ min</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- SLIDERS -->
+  <div class="slider-row">
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Audience Awareness</span>
+        <span class="slider-val" id="awarVal">3</span>
+      </div>
+      <span class="slider-desc" id="awarDesc">Solution aware</span>
+      <input type="range" min="1" max="5" value="3" id="awareness">
+    </div>
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Sophistication</span>
+        <span class="slider-val" id="sophVal">2</span>
+      </div>
+      <span class="slider-desc" id="sophDesc">Seen some offers</span>
+      <input type="range" min="1" max="5" value="2" id="sophistication">
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="gen-row">
+    <button class="btn-gen" id="genBtn" onclick="generate()">GENERATE</button>
+    <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+    <div class="spinner" id="spinner"></div>
+    <span class="status" id="status"></span>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output" id="output">
+    <div class="output-header">
+      <div class="out-label" id="outputLabel">Output</div>
+      <button class="btn-copy" onclick="copyOutput()">COPY</button>
+    </div>
+    <div class="out-tabs" id="outTabs"></div>
+    <div class="out-block" id="outBlock"></div>
+  </div>
+
+</div>
+
+<script>
+const modeDescs = {
+  ideas: { title: "Video Ideas", body: "Generate 5 video ideas based on your niche, audience, and what's working in the market. Each idea includes a topic, angle, and why it will perform. Save the ones you like to use in the next steps." },
+  titles: { title: "Titles + Hooks", body: "Generate 8 title options and 6 opening hook lines for a specific video topic. Titles are optimized for clicks. Hooks are written to stop the skip in the first 5 seconds." },
+  outline: { title: "Video Outline", body: "Build a full chapter-by-chapter outline with talking points, transitions, and timestamps. Gives you a complete roadmap before you film." },
+  script: { title: "Full Script", body: "Write the complete word-for-word script including hook, intro, all sections, and CTA. Formatted for teleprompter or reference use." },
+};
+
+const awarDescs = ['Unaware of problem','Problem aware','Solution aware','Product aware','Ready to buy'];
+const sophDescs = ['Fresh market','Seen some offers','Multiple solutions','Skeptical','Maximum skepticism'];
+
+let currentMode = 'ideas';
+let currentType = 'Educational';
+let savedIdeas = [];
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    document.getElementById('modeDescTitle').textContent = modeDescs[currentMode].title;
+    document.getElementById('modeDescBody').textContent = modeDescs[currentMode].body;
+    document.querySelectorAll('.dynamic-section').forEach(s => s.classList.remove('visible'));
+    document.getElementById(`mode-${currentMode}-input`)?.classList.add('visible');
+    updateGenBtn();
+  });
+});
+
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+  });
+});
+
+document.getElementById('awareness').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('awarVal').textContent = v;
+  document.getElementById('awarDesc').textContent = awarDescs[v-1];
+});
+
+document.getElementById('sophistication').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('sophVal').textContent = v;
+  document.getElementById('sophDesc').textContent = sophDescs[v-1];
+});
+
+function updateGenBtn() {
+  const labels = { ideas: 'GET IDEAS', titles: 'GET TITLES', outline: 'BUILD OUTLINE', script: 'WRITE SCRIPT' };
+  document.getElementById('genBtn').textContent = labels[currentMode] || 'GENERATE';
+}
+
+function saveIdea(idea) {
+  if (savedIdeas.find(i => i.title === idea.title)) return;
+  savedIdeas.push(idea);
+  renderIdeasBank();
+}
+
+function renderIdeasBank() {
+  const bank = document.getElementById('ideasBank');
+  const pills = document.getElementById('ideaPills');
+  if (savedIdeas.length === 0) { bank.style.display = 'none'; return; }
+  bank.style.display = 'block';
+  pills.innerHTML = '';
+  savedIdeas.forEach((idea, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'idea-pill';
+    pill.innerHTML = `<span onclick="useIdea(${i})">${idea.title}</span><span class="pill-x" onclick="removeIdea(${i})">✕</span>`;
+    pills.appendChild(pill);
+  });
+}
+
+function useIdea(i) {
+  const idea = savedIdeas[i];
+  const text = `${idea.title}\n\nAngle: ${idea.angle}`;
+  ['titleTopic','outlineTopic','scriptTopic'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = text;
+  });
+}
+
+function removeIdea(i) {
+  savedIdeas.splice(i, 1);
+  renderIdeasBank();
+}
+
+function buildPrompt() {
+  const brand = document.getElementById('brand').value || 'Not specified';
+  const audience = document.getElementById('audience').value || 'Not specified';
+  const niche = document.getElementById('niche').value || 'Not specified';
+  const voice = document.getElementById('voice').value || 'Direct, conversational, confident';
+  const cta = document.getElementById('cta').value || 'None';
+  const vidLength = document.getElementById('vidLength').value;
+  const awar = document.getElementById('awarVal').textContent;
+  const soph = document.getElementById('sophVal').textContent;
+
+  const base = `Creator: ${brand}\nAudience: ${audience}\nNiche: ${niche}\nVideo Type: ${currentType}\nVoice Sample: ${voice}\nCTA: ${cta}\nTarget Length: ${vidLength}\nAwareness: ${awar}/5 (${awarDescs[parseInt(awar)-1]})\nSophistication: ${soph}/5 (${sophDescs[parseInt(soph)-1]})`;
+
+  if (currentMode === 'ideas') {
+    const market = document.getElementById('marketInsights').value || 'Not provided';
+    return `You are a YouTube strategist. Generate 5 high-performing video ideas. Respond ONLY with valid JSON. No markdown, no backticks.
+
+${base}
+Market Insights: ${market}
+
+Return:
+{
+  "ideas": [
+    {
+      "title": "Working video title",
+      "angle": "The specific angle or hook that makes this video stand out from others on this topic",
+      "why_it_works": "One sentence on why this will perform for this audience",
+      "search_potential": "High / Medium / Low",
+      "virality_potential": "High / Medium / Low"
+    }
+  ]
+}`;
+  }
+
+  if (currentMode === 'titles') {
+    const topic = document.getElementById('titleTopic').value || 'Not specified';
+    return `You are a YouTube title and hook specialist. Respond ONLY with valid JSON. No markdown, no backticks.
+
+${base}
+Topic/Idea: ${topic}
+
+Return:
+{
+  "titles": [
+    { "type": "Curiosity", "title": "title here" },
+    { "type": "Curiosity", "title": "title here" },
+    { "type": "Benefit", "title": "title here" },
+    { "type": "Benefit", "title": "title here" },
+    { "type": "Contrarian", "title": "title here" },
+    { "type": "Contrarian", "title": "title here" },
+    { "type": "Story", "title": "title here" },
+    { "type": "Story", "title": "title here" }
+  ],
+  "top_title": "The single best title and why in one sentence",
+  "hooks": [
+    { "type": "Question", "line": "Opening hook line — first 5 seconds on camera" },
+    { "type": "Bold Statement", "line": "Opening hook line" },
+    { "type": "Story Drop", "line": "Open mid-scene" },
+    { "type": "Curiosity", "line": "Opens a loop immediately" },
+    { "type": "Pattern Interrupt", "line": "Says something unexpected" },
+    { "type": "Direct Promise", "line": "Tells them exactly what they get" }
+  ],
+  "top_hook": "Best hook for this video and why",
+  "thumbnail_angles": ["angle 1", "angle 2", "angle 3"]
+}`;
+  }
+
+  if (currentMode === 'outline') {
+    const topic = document.getElementById('outlineTopic').value || 'Not specified';
+    return `You are a YouTube video strategist and outline architect. Respond ONLY with valid JSON. No markdown, no backticks.
+
+${base}
+Topic/Idea: ${topic}
+
+Return:
+{
+  "title": "Recommended title for this video",
+  "hook": "Opening hook line",
+  "sections": [
+    {
+      "tag": "HOOK",
+      "title": "Section name",
+      "timestamp": "0:00",
+      "talking_points": ["point 1", "point 2", "point 3"],
+      "transition": "How to move to the next section"
+    }
+  ],
+  "cta_placement": "When and how to drop the CTA in the video",
+  "pattern_interrupts": ["Moment 1 to keep retention", "Moment 2", "Moment 3"],
+  "total_estimated_time": "${vidLength}"
+}
+
+Sections should follow: Hook → Pattern Interrupt → Intro → Core Content (3–5 sections) → Recap → CTA`;
+  }
+
+  if (currentMode === 'script') {
+    const topic = document.getElementById('scriptTopic').value || 'Not specified';
+    return `You are a world-class YouTube scriptwriter. Write a complete word-for-word script. Respond ONLY with valid JSON. No markdown, no backticks.
+
+${base}
+Topic/Idea: ${topic}
+
+Return:
+{
+  "title": "Recommended title",
+  "sections": [
+    {
+      "tag": "HOOK",
+      "script": "Word-for-word script for this section"
+    }
+  ],
+  "director_notes": "3-4 sentences on delivery, pacing, energy, and camera presence for this specific video",
+  "scores": {
+    "hook": 0,
+    "retention": 0,
+    "clarity": 0,
+    "voice_fit": 0,
+    "cta_strength": 0,
+    "overall": 0
+  },
+  "strengths": "3 strengths",
+  "improvements": "3 improvements with rewrites"
+}
+
+Sections: HOOK (first 30 sec — must stop the skip) → PATTERN INTERRUPT → INTRO (who you are, what they get) → SECTION 1 → SECTION 2 → SECTION 3 (add more as needed) → RECAP → CTA. Match the voice sample exactly.`;
+  }
+}
+
+async function generate() {
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('spinner');
+  const status = document.getElementById('status');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  status.textContent = 'Working...';
+  document.getElementById('output').classList.remove('visible');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: buildPrompt() }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const d = JSON.parse(clean);
+
+    renderOutput(d);
+    document.getElementById('output').classList.add('visible');
+    status.textContent = '✓ Done';
+    setTimeout(() => status.textContent = '', 3000);
+  } catch(err) {
+    console.error(err);
+    status.textContent = 'Error — check inputs and try again.';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function renderOutput(d) {
+  const tabs = document.getElementById('outTabs');
+  const block = document.getElementById('outBlock');
+  tabs.innerHTML = '';
+  block.innerHTML = '';
+
+  if (currentMode === 'ideas') {
+    tabs.innerHTML = '<div class="out-tab active">Ideas</div>';
+    let html = '<div class="out-section"><div class="out-section-title">5 Video Ideas — Click to Save</div><div class="idea-cards" id="ideaCards"></div></div>';
+    block.innerHTML = html;
+    (d.ideas || []).forEach((idea, i) => {
+      const card = document.createElement('div');
+      card.className = 'idea-card';
+      card.innerHTML = `
+        <div class="idea-card-num">Idea ${i+1} · Search: ${idea.search_potential} · Viral: ${idea.virality_potential}</div>
+        <div class="idea-card-title">${idea.title}</div>
+        <div class="idea-card-angle">${idea.angle}</div>
+        <div class="idea-card-angle" style="margin-top:4px;color:#555;">${idea.why_it_works}</div>
+        <div class="idea-card-save" onclick="saveIdeaFromCard(${i}, this)">+ Save Idea</div>`;
+      document.getElementById('ideaCards').appendChild(card);
+    });
+    window._lastIdeas = d.ideas;
+  }
+
+  if (currentMode === 'titles') {
+    tabs.innerHTML = `
+      <div class="out-tab active" onclick="showTitlesTab('titles', this)">Titles</div>
+      <div class="out-tab" onclick="showTitlesTab('hooks', this)">Hooks</div>
+      <div class="out-tab" onclick="showTitlesTab('thumbnail', this)">Thumbnail</div>`;
+
+    let titlesHtml = `<div id="titles-pane">
+      <div class="out-section"><div class="out-section-title">8 Title Options</div>`;
+    (d.titles || []).forEach(t => {
+      titlesHtml += `<div class="title-card"><div class="title-card-label">${t.type}</div><div class="title-card-title">${t.title}</div></div>`;
+    });
+    titlesHtml += `</div><div class="out-section"><div class="out-section-title">Top Pick</div><div class="out-text">${d.top_title || ''}</div></div></div>`;
+
+    let hooksHtml = `<div id="hooks-pane" style="display:none;">
+      <div class="out-section"><div class="out-section-title">6 Opening Hooks</div>`;
+    (d.hooks || []).forEach(h => {
+      hooksHtml += `<div class="title-card"><div class="title-card-label">${h.type}</div><div class="title-card-hook">${h.line}</div></div>`;
+    });
+    hooksHtml += `</div><div class="out-section"><div class="out-section-title">Top Hook</div><div class="out-text">${d.top_hook || ''}</div></div></div>`;
+
+    let thumbHtml = `<div id="thumbnail-pane" style="display:none;">
+      <div class="out-section"><div class="out-section-title">Thumbnail Angles</div>`;
+    (d.thumbnail_angles || []).forEach((a, i) => {
+      thumbHtml += `<div class="title-card"><div class="title-card-label">Option ${i+1}</div><div class="title-card-title">${a}</div></div>`;
+    });
+    thumbHtml += '</div></div>';
+
+    block.innerHTML = titlesHtml + hooksHtml + thumbHtml;
+  }
+
+  if (currentMode === 'outline') {
+    tabs.innerHTML = '<div class="out-tab active">Outline</div>';
+    let html = `
+      <div class="out-section">
+        <div class="out-section-title">Title</div>
+        <div class="out-text">${d.title || ''}</div>
+      </div>
+      <div class="out-section">
+        <div class="out-section-title">Opening Hook</div>
+        <div class="out-text">${d.hook || ''}</div>
+      </div>
+      <div class="out-section">
+        <div class="out-section-title">Chapter Breakdown</div>`;
+    (d.sections || []).forEach(s => {
+      html += `<div class="outline-section">
+        <div class="outline-section-tag">${s.tag} · ${s.timestamp || ''}</div>
+        <div class="outline-section-title">${s.title}</div>
+        <div class="outline-section-body">${(s.talking_points || []).map(p => `• ${p}`).join('<br>')}</div>
+        ${s.transition ? `<div style="font-family:'DM Mono',monospace;font-size:9px;color:#555;margin-top:6px;letter-spacing:1px;">TRANSITION → ${s.transition}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>
+      <div class="out-section">
+        <div class="out-section-title">CTA Placement</div>
+        <div class="out-text">${d.cta_placement || ''}</div>
+      </div>
+      <div class="out-section">
+        <div class="out-section-title">Pattern Interrupts</div>
+        <div class="out-text">${(d.pattern_interrupts || []).map((p,i) => `${i+1}. ${p}`).join('\n')}</div>
+      </div>`;
+    block.innerHTML = html;
+  }
+
+  if (currentMode === 'script') {
+    tabs.innerHTML = `
+      <div class="out-tab active" onclick="showScriptTab('script', this)">Script</div>
+      <div class="out-tab" onclick="showScriptTab('rubric', this)">Rubric</div>`;
+
+    let scriptHtml = `<div id="script-pane">
+      <div class="out-section">
+        <div class="out-section-title">Recommended Title</div>
+        <div class="out-text">${d.title || ''}</div>
+      </div>
+      <div class="out-section">
+        <div class="out-section-title">Full Script</div>`;
+    (d.sections || []).forEach(s => {
+      scriptHtml += `<div class="script-section">
+        <div class="script-section-tag">${s.tag}</div>
+        <div class="script-section-text ${s.tag === 'HOOK' ? 'hook' : ''}">${s.script}</div>
+      </div>`;
+    });
+    scriptHtml += `</div>
+      <div class="out-section">
+        <div class="out-section-title">Director Notes</div>
+        <div class="out-text">${d.director_notes || ''}</div>
+      </div>
+    </div>`;
+
+    const scoreLabels = { hook: 'Hook', retention: 'Retention', clarity: 'Clarity', voice_fit: 'Voice Fit', cta_strength: 'CTA Strength', overall: 'OVERALL' };
+    let rubricHtml = `<div id="rubric-pane" style="display:none;">
+      <div class="out-section"><div class="out-section-title">Scores</div>`;
+    Object.entries(scoreLabels).forEach(([k, label]) => {
+      const v = d.scores?.[k] || 0;
+      rubricHtml += `<div class="score-row">
+        <div class="score-name">${label}</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${v*10}%"></div></div>
+        <div class="score-num">${v}</div>
+      </div>`;
+    });
+    rubricHtml += `</div>
+      <div class="out-section"><div class="out-section-title">Strengths</div><div class="out-text">${d.strengths || ''}</div></div>
+      <div class="out-section"><div class="out-section-title">Improvements</div><div class="out-text">${d.improvements || ''}</div></div>
+    </div>`;
+
+    block.innerHTML = scriptHtml + rubricHtml;
+  }
+}
+
+function saveIdeaFromCard(i, el) {
+  const idea = window._lastIdeas?.[i];
+  if (!idea) return;
+  saveIdea(idea);
+  el.textContent = '✓ Saved';
+  el.classList.add('saved');
+}
+
+function showTitlesTab(tab, el) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['titles-pane','hooks-pane','thumbnail-pane'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const pane = document.getElementById(`${tab}-pane`);
+  if (pane) pane.style.display = 'block';
+}
+
+function showScriptTab(tab, el) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['script-pane','rubric-pane'].forEach(id => {
+    const p = document.getElementById(id);
+    if (p) p.style.display = 'none';
+  });
+  const pane = document.getElementById(`${tab}-pane`);
+  if (pane) pane.style.display = 'block';
+}
+
+function copyOutput() {
+  let text = '';
+  if (currentMode === 'script') {
+    document.querySelectorAll('.script-section').forEach(s => {
+      text += `[${s.querySelector('.script-section-tag').textContent}]\n${s.querySelector('.script-section-text').textContent}\n\n`;
+    });
+  } else {
+    text = document.getElementById('outBlock').innerText;
+  }
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIED!';
+    setTimeout(() => btn.textContent = 'COPY', 2000);
+  });
+}
+
+function clearAll() {
+  ['brand','audience','niche','voice','cta','marketInsights','titleTopic','outlineTopic','scriptTopic'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('awareness').value = 3;
+  document.getElementById('awarVal').textContent = 3;
+  document.getElementById('awarDesc').textContent = awarDescs[2];
+  document.getElementById('sophistication').value = 2;
+  document.getElementById('sophVal').textContent = 2;
+  document.getElementById('sophDesc').textContent = sophDescs[1];
+  document.getElementById('output').classList.remove('visible');
+  document.getElementById('status').textContent = '';
+}
+</script>
+    </div>
+
+    <!-- RUBRIC BOT -->
+    <div class="bot-pane" id="pane-rubric">
+      <div class="page">
+
+  <div class="header">
+    <div class="logo-mark">[C<span class="two">2</span>C]</div>
+    <div class="header-tag">Rubric Bot</div>
+  </div>
+
+  <!-- FORMAT -->
+  <div class="section-label">01 — Copy Format</div>
+  <div class="format-grid" id="fmtGrid">
+    <div class="fmt-btn active" data-fmt="Email">Email</div>
+    <div class="fmt-btn" data-fmt="Short-Form Script">Short Script</div>
+    <div class="fmt-btn" data-fmt="YouTube Script">YT Script</div>
+    <div class="fmt-btn" data-fmt="Instagram Caption">IG Caption</div>
+    <div class="fmt-btn" data-fmt="Ad Copy">Ad Copy</div>
+    <div class="fmt-btn" data-fmt="Landing Page / VSL">VSL / LP</div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="section-label">02 — Context</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Audience</label>
+      <input type="text" id="audience" placeholder="Who is this copy written for?">
+    </div>
+    <div class="field">
+      <label>Goal / Objective</label>
+      <input type="text" id="goal" placeholder="e.g. Get email signups, sell the program, drive comments">
+    </div>
+    <div class="field full">
+      <label>Voice Sample / Brand Tone <span style="color:#555;font-size:9px;">(optional but improves voice fit score)</span></label>
+      <textarea id="voice" placeholder="Paste real writing from the brand so the bot can judge voice fit accurately."></textarea>
+    </div>
+    <div class="field full">
+      <label>Paste Your Copy Here</label>
+      <textarea id="copy" class="xl" placeholder="Paste the full piece of copy you want scored — email, script, caption, ad, VSL, anything."></textarea>
+    </div>
+  </div>
+
+  <!-- SLIDERS -->
+  <div class="slider-row">
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Audience Awareness</span>
+        <span class="slider-val" id="awarVal">3</span>
+      </div>
+      <span class="slider-desc" id="awarDesc">Solution aware</span>
+      <input type="range" min="1" max="5" value="3" id="awareness">
+    </div>
+    <div class="slider-field">
+      <div class="slider-top">
+        <span class="slider-label">Sophistication</span>
+        <span class="slider-val" id="sophVal">2</span>
+      </div>
+      <span class="slider-desc" id="sophDesc">Seen some offers</span>
+      <input type="range" min="1" max="5" value="2" id="sophistication">
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="gen-row">
+    <button class="btn-gen" id="genBtn" onclick="score()">SCORE MY COPY</button>
+    <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+    <div class="spinner" id="spinner"></div>
+    <span class="status" id="status"></span>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output" id="output">
+
+    <!-- HERO SCORE -->
+    <div class="score-hero" id="scoreHero">
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-hero-right">
+        <div class="score-verdict" id="scoreVerdict"></div>
+        <div class="score-summary" id="scoreSummary"></div>
+      </div>
+    </div>
+
+    <div class="out-tabs">
+      <div class="out-tab active" onclick="switchTab('scores')">Scores</div>
+      <div class="out-tab" onclick="switchTab('fixes')">Priority Fixes</div>
+      <div class="out-tab" onclick="switchTab('annotated')">Line by Line</div>
+      <div class="out-tab" onclick="switchTab('rewrite')">Rewritten</div>
+    </div>
+
+    <div class="out-block">
+
+      <div class="tab-pane active" id="tab-scores">
+        <div class="out-section">
+          <div class="out-section-title">Dimension Scores</div>
+          <div id="out-scores"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">What's Working</div>
+          <div class="out-text" id="out-strengths"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-fixes">
+        <div class="out-section">
+          <div class="out-section-title">Fix These First — Ranked by Impact</div>
+          <div id="out-fixes"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-annotated">
+        <div class="out-section">
+          <div class="out-section-title">Line by Line — Original vs Note</div>
+          <div id="out-annotated"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-rewrite">
+        <div class="out-section">
+          <div class="out-section-title">Rewritten Version</div>
+          <div class="out-text" id="out-rewrite"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">What Changed + Why</div>
+          <div class="out-text" id="out-rewrite-notes"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const awarDescs = ['Unaware of problem','Problem aware','Solution aware','Product aware','Ready to buy'];
+const sophDescs = ['Fresh market','Seen some offers','Multiple solutions','Skeptical','Maximum skepticism'];
+let currentFmt = 'Email';
+
+document.querySelectorAll('.fmt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFmt = btn.dataset.fmt;
+  });
+});
+
+document.getElementById('awareness').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('awarVal').textContent = v;
+  document.getElementById('awarDesc').textContent = awarDescs[v-1];
+});
+
+document.getElementById('sophistication').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  document.getElementById('sophVal').textContent = v;
+  document.getElementById('sophDesc').textContent = sophDescs[v-1];
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function getScoreClass(v) {
+  if (v <= 5) return 'low';
+  if (v <= 7) return 'mid';
+  return 'high';
+}
+
+function getVerdict(v) {
+  if (v <= 4) return 'Needs a Full Rewrite';
+  if (v <= 6) return 'Has Potential — Needs Work';
+  if (v <= 7) return 'Solid — A Few Key Fixes';
+  if (v <= 8) return 'Strong Copy — Sharpen the Edges';
+  return 'Near Perfect — Minor Polish';
+}
+
+function buildPrompt() {
+  const formatDimensions = {
+    'Email': 'subject_line, preheader, hook, body, proof, flow, cta_strength, voice_fit',
+    'Short-Form Script': 'hook, retention, clarity, voice_fit, cta_strength, platform_fit',
+    'YouTube Script': 'hook, retention, clarity, structure, voice_fit, cta_strength',
+    'Instagram Caption': 'hook, readability, engagement_trigger, voice_fit, cta_strength',
+    'Ad Copy': 'hook, clarity, desire, proof, cta_strength, platform_fit',
+    'Landing Page / VSL': 'hook, flow, desire, proof, mechanism_clarity, cta_strength',
+  };
+
+  const dims = formatDimensions[currentFmt] || 'hook, body, flow, cta_strength, voice_fit';
+
+  return `You are the most honest, experienced direct response copy critic alive. Your job is to give ACCURATE scores, not encouraging ones. If copy is a 5, call it a 5. Vague feedback helps no one.
+
+Respond ONLY with valid JSON. No markdown, no backticks, no preamble.
+
+FORMAT: ${currentFmt}
+AUDIENCE: ${document.getElementById('audience').value || 'Not specified'}
+GOAL: ${document.getElementById('goal').value || 'Not specified'}
+AWARENESS LEVEL: ${document.getElementById('awarVal').textContent}/5 (${awarDescs[parseInt(document.getElementById('awarVal').textContent)-1]})
+SOPHISTICATION LEVEL: ${document.getElementById('sophVal').textContent}/5 (${sophDescs[parseInt(document.getElementById('sophVal').textContent)-1]})
+VOICE SAMPLE: ${document.getElementById('voice').value || 'Not provided'}
+
+COPY TO SCORE:
+---
+${document.getElementById('copy').value}
+---
+
+Return this exact JSON:
+{
+  "overall": 0,
+  "verdict": "One sharp sentence verdict on this copy — what is it overall?",
+  "summary": "2-3 sentences: biggest strength, biggest weakness, and what would move the needle most",
+  "scores": {
+    ${dims.split(', ').map(d => `"${d}": 0`).join(',\n    ')}
+  },
+  "strengths": "3 specific things done well — be precise, quote the copy where possible. Each on its own line starting with a number.",
+  "fixes": [
+    {
+      "priority": "Critical",
+      "dimension": "Which dimension this affects",
+      "problem": "Exactly what is wrong and why it hurts the copy",
+      "rewrite": "The fixed version — actual copy, not advice"
+    },
+    {
+      "priority": "Critical",
+      "dimension": "Which dimension",
+      "problem": "What is wrong",
+      "rewrite": "Fixed version"
+    },
+    {
+      "priority": "Important",
+      "dimension": "Which dimension",
+      "problem": "What is wrong",
+      "rewrite": "Fixed version"
+    },
+    {
+      "priority": "Important",
+      "dimension": "Which dimension",
+      "problem": "What is wrong",
+      "rewrite": "Fixed version"
+    },
+    {
+      "priority": "Nice to Have",
+      "dimension": "Which dimension",
+      "problem": "What is wrong",
+      "rewrite": "Fixed version"
+    }
+  ],
+  "annotations": [
+    {
+      "line": "Exact line or phrase from the copy",
+      "note": "What is happening here — good, weak, or needs fixing",
+      "status": "good | weak | fix"
+    }
+  ],
+  "rewrite": "Full rewritten version of the copy with all fixes applied. Match the format (email body, script, caption, etc). Keep the voice.",
+  "rewrite_notes": "Bullet list of what specifically changed and why — one change per line starting with a dash"
+}
+
+All scores are integers 1–10. Minimum 6 annotations. Be specific. Quote the actual copy in problems and rewrites.`;
+}
+
+async function score() {
+  const copy = document.getElementById('copy').value.trim();
+  if (!copy) {
+    document.getElementById('status').textContent = 'Paste your copy first.';
+    return;
+  }
+
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('spinner');
+  const status = document.getElementById('status');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  status.textContent = 'Scoring...';
+  document.getElementById('output').classList.remove('visible');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: buildPrompt() }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const d = JSON.parse(clean);
+
+    // HERO
+    const overall = d.overall || 0;
+    const cls = getScoreClass(overall);
+    const scoreBig = document.getElementById('scoreBig');
+    scoreBig.textContent = overall;
+    scoreBig.className = `score-big ${cls}`;
+    document.getElementById('scoreVerdict').textContent = d.verdict || getVerdict(overall);
+    document.getElementById('scoreSummary').textContent = d.summary || '';
+
+    // SCORES TAB
+    const scoresEl = document.getElementById('out-scores');
+    scoresEl.innerHTML = '';
+    Object.entries(d.scores || {}).forEach(([k, v]) => {
+      const c = getScoreClass(v);
+      const label = k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const row = document.createElement('div');
+      row.className = 'score-row';
+      row.innerHTML = `
+        <div class="score-name">${label}</div>
+        <div class="score-bar-wrap"><div class="score-bar ${c}" style="width:${v*10}%"></div></div>
+        <div class="score-num ${c}">${v}</div>`;
+      scoresEl.appendChild(row);
+    });
+    document.getElementById('out-strengths').textContent = d.strengths || '';
+
+    // FIXES TAB
+    const fixesEl = document.getElementById('out-fixes');
+    fixesEl.innerHTML = '';
+    (d.fixes || []).forEach(fix => {
+      const cls = fix.priority === 'Critical' ? '' : fix.priority === 'Important' ? 'mid' : 'low';
+      const card = document.createElement('div');
+      card.className = `fix-card ${cls}`;
+      card.innerHTML = `
+        <div class="fix-priority">${fix.priority} · ${fix.dimension}</div>
+        <div class="fix-title">${fix.problem}</div>
+        <div class="fix-rewrite-label">Rewrite →</div>
+        <div class="fix-rewrite">${fix.rewrite}</div>`;
+      fixesEl.appendChild(card);
+    });
+
+    // ANNOTATED TAB
+    const annEl = document.getElementById('out-annotated');
+    annEl.innerHTML = '';
+    (d.annotations || []).forEach(ann => {
+      const row = document.createElement('div');
+      row.className = 'annotated-line';
+      row.innerHTML = `
+        <div class="ann-original">"${ann.line}"</div>
+        <div class="ann-note ${ann.status || ''}">${ann.note}</div>`;
+      annEl.appendChild(row);
+    });
+
+    // REWRITE TAB
+    document.getElementById('out-rewrite').textContent = d.rewrite || '';
+    document.getElementById('out-rewrite-notes').textContent = d.rewrite_notes || '';
+
+    document.getElementById('output').classList.add('visible');
+    switchTab('scores');
+    status.textContent = '✓ Scored';
+    setTimeout(() => status.textContent = '', 3000);
+
+  } catch(err) {
+    console.error(err);
+    status.textContent = 'Error — check inputs and try again.';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function clearAll() {
+  ['audience','goal','voice','copy'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('awareness').value = 3;
+  document.getElementById('awarVal').textContent = 3;
+  document.getElementById('awarDesc').textContent = awarDescs[2];
+  document.getElementById('sophistication').value = 2;
+  document.getElementById('sophVal').textContent = 2;
+  document.getElementById('sophDesc').textContent = sophDescs[1];
+  document.getElementById('output').classList.remove('visible');
+  document.getElementById('status').textContent = '';
+}
+</script>
+    </div>
+
+
+    <!-- STUDY BOT -->
+    <div class="bot-pane" id="pane-study">
+      <div class="page">
+
+  <div class="header">
+    <div class="logo-mark">[C<span class="two">2</span>C]</div>
+    <div class="header-tag">Study Bot</div>
+  </div>
+
+  <!-- STUDY MODE -->
+  <div class="section-label">01 — What Are You Studying?</div>
+  <div class="mode-grid" id="modeGrid">
+    <div class="mode-btn active" data-mode="creator">
+      <div class="mode-icon">👤</div>
+      <div>Creator / Influencer</div>
+    </div>
+    <div class="mode-btn" data-mode="brand">
+      <div class="mode-icon">🏢</div>
+      <div>Brand / Company</div>
+    </div>
+    <div class="mode-btn" data-mode="copy">
+      <div class="mode-icon">📋</div>
+      <div>Paste Copy to Study</div>
+    </div>
+  </div>
+
+  <div class="mode-desc" id="modeDesc">
+    <div class="mode-desc-title" id="modeDescTitle">Study a Creator</div>
+    <div class="mode-desc-body" id="modeDescBody">Analyze a creator or influencer in your space — their content angles, hook patterns, copy frameworks, and what's driving their growth. Extract the principles you can apply to your own work.</div>
+  </div>
+
+  <!-- FOCUS AREAS -->
+  <div class="section-label">02 — What Do You Want to Extract?</div>
+  <div class="focus-grid" id="focusGrid">
+    <div class="focus-btn selected" data-focus="Hook Patterns">Hook Patterns</div>
+    <div class="focus-btn selected" data-focus="Content Angles">Content Angles</div>
+    <div class="focus-btn selected" data-focus="Copy Frameworks">Copy Frameworks</div>
+    <div class="focus-btn" data-focus="Offer Structure">Offer Structure</div>
+    <div class="focus-btn" data-focus="Email Strategy">Email Strategy</div>
+    <div class="focus-btn" data-focus="CTA Patterns">CTA Patterns</div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="section-label">03 — Inputs</div>
+  <div class="form-grid">
+
+    <!-- CREATOR / BRAND FIELDS -->
+    <div class="field dynamic-field visible" id="field-name">
+      <label id="name-label">Creator / Brand Name</label>
+      <input type="text" id="subjectName" placeholder="e.g. Alex Hormozi, Rohn Starling, Nike">
+    </div>
+    <div class="field dynamic-field visible" id="field-platform">
+      <label>Primary Platform</label>
+      <select id="platform">
+        <option value="Instagram">Instagram</option>
+        <option value="TikTok">TikTok</option>
+        <option value="YouTube">YouTube</option>
+        <option value="Twitter/X">Twitter/X</option>
+        <option value="Email / Newsletter">Email / Newsletter</option>
+        <option value="All Platforms">All Platforms</option>
+      </select>
+    </div>
+    <div class="field full dynamic-field visible" id="field-context">
+      <label>What You Know About Them <span style="color:#555;font-size:9px;">(paste anything — bio, recent posts, content description, what they sell)</span></label>
+      <textarea id="subjectContext" placeholder="Paste their bio, a recent post, their offer, anything you know. The more context the better the analysis."></textarea>
+    </div>
+
+    <!-- PASTE COPY FIELD -->
+    <div class="field full dynamic-field" id="field-paste-copy">
+      <label>Paste the Copy You Want to Study</label>
+      <textarea id="pasteCopy" style="min-height:200px;" placeholder="Paste an email, script, caption, VSL, ad, or any piece of copy you want to break down and learn from."></textarea>
+    </div>
+
+    <!-- SHARED -->
+    <div class="field">
+      <label>Your Niche</label>
+      <input type="text" id="yourNiche" placeholder="e.g. Online coaching, content creation, fitness">
+    </div>
+    <div class="field">
+      <label>Your Audience</label>
+      <input type="text" id="yourAudience" placeholder="e.g. Course creators, D1 athletes, coaches">
+    </div>
+    <div class="field full">
+      <label>What Do You Want to Apply This To? <span style="color:#555;font-size:9px;">(optional — helps tailor the steal section)</span></label>
+      <input type="text" id="applyTo" placeholder="e.g. My email welcome sequence, my TikTok hooks, my offer page">
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="gen-row">
+    <button class="btn-gen" id="genBtn" onclick="study()">STUDY IT</button>
+    <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+    <div class="spinner" id="spinner"></div>
+    <span class="status" id="status"></span>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output" id="output">
+    <div class="output-header">
+      <div class="out-label" id="outputLabel">Study Results</div>
+      <button class="btn-copy" onclick="copyOutput()">COPY REPORT</button>
+    </div>
+    <div class="out-tabs">
+      <div class="out-tab active" onclick="switchTab('overview')">Overview</div>
+      <div class="out-tab" onclick="switchTab('patterns')">Patterns</div>
+      <div class="out-tab" onclick="switchTab('steal')">What to Steal</div>
+      <div class="out-tab" onclick="switchTab('swipe')">Swipe File</div>
+    </div>
+    <div class="out-block">
+
+      <div class="tab-pane active" id="tab-overview">
+        <div class="out-section" id="profile-section">
+          <div class="out-section-title" id="profile-title">Subject Profile</div>
+          <div id="out-profile"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Why They're Winning</div>
+          <div class="out-text" id="out-why"></div>
+        </div>
+        <div class="out-section">
+          <div class="out-section-title">Their Core Strategy in One Paragraph</div>
+          <div class="out-text" id="out-strategy"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-patterns">
+        <div class="out-section">
+          <div class="out-section-title">Patterns Found</div>
+          <div id="out-patterns"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-steal">
+        <div class="out-section">
+          <div class="out-section-title">Steal These — Applied to Your Work</div>
+          <div id="out-steal"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-swipe">
+        <div class="out-section">
+          <div class="out-section-title">Swipe File — Save These Lines</div>
+          <div id="out-swipe"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const modeDescs = {
+  creator: {
+    title: "Study a Creator",
+    body: "Analyze a creator or influencer in your space — their content angles, hook patterns, copy frameworks, and what's driving their growth. Extract the principles you can apply to your own work."
+  },
+  brand: {
+    title: "Study a Brand",
+    body: "Break down a brand's copy strategy — their email flows, ad angles, landing page structure, offer positioning, and what makes their marketing convert. Steal the principles, not the words."
+  },
+  copy: {
+    title: "Study a Piece of Copy",
+    body: "Paste any email, script, caption, VSL, or ad and get a full breakdown — what frameworks they used, why it works, the hooks, the CTAs, and exactly what you can take and apply."
+  }
+};
+
+let currentMode = 'creator';
+let selectedFocus = new Set(['Hook Patterns', 'Content Angles', 'Copy Frameworks']);
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    document.getElementById('modeDescTitle').textContent = modeDescs[currentMode].title;
+    document.getElementById('modeDescBody').textContent = modeDescs[currentMode].body;
+
+    const creatorFields = ['field-name','field-platform','field-context'];
+    const pasteFields = ['field-paste-copy'];
+
+    if (currentMode === 'copy') {
+      creatorFields.forEach(id => document.getElementById(id)?.classList.remove('visible'));
+      pasteFields.forEach(id => document.getElementById(id)?.classList.add('visible'));
+      document.getElementById('name-label').textContent = 'Source (optional)';
+    } else {
+      creatorFields.forEach(id => document.getElementById(id)?.classList.add('visible'));
+      pasteFields.forEach(id => document.getElementById(id)?.classList.remove('visible'));
+      document.getElementById('name-label').textContent = currentMode === 'brand' ? 'Brand Name' : 'Creator / Brand Name';
+    }
+  });
+});
+
+document.querySelectorAll('.focus-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const focus = btn.dataset.focus;
+    if (selectedFocus.has(focus)) {
+      if (selectedFocus.size <= 1) return;
+      selectedFocus.delete(focus);
+      btn.classList.remove('selected');
+    } else {
+      selectedFocus.add(focus);
+      btn.classList.add('selected');
+    }
+  });
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function buildPrompt() {
+  const focus = Array.from(selectedFocus).join(', ');
+  const name = document.getElementById('subjectName').value || '';
+  const platform = document.getElementById('platform').value || '';
+  const context = document.getElementById('subjectContext').value || '';
+  const pasteCopy = document.getElementById('pasteCopy').value || '';
+  const yourNiche = document.getElementById('yourNiche').value || 'Not specified';
+  const yourAudience = document.getElementById('yourAudience').value || 'Not specified';
+  const applyTo = document.getElementById('applyTo').value || 'General copy and content';
+
+  const subjectDesc = currentMode === 'copy'
+    ? `COPY TO STUDY:\n---\n${pasteCopy}\n---`
+    : `SUBJECT: ${name}\nPLATFORM: ${platform}\nCONTEXT: ${context || 'Not provided — use your training knowledge'}`;
+
+  return `You are a world-class copy strategist and market researcher. Your job is to break down what is working, extract the principles, and show exactly how to apply them. Be specific — no generic observations.
+
+Respond ONLY with valid JSON. No markdown, no backticks, no preamble.
+
+STUDY MODE: ${currentMode === 'copy' ? 'Copy Analysis' : currentMode === 'brand' ? 'Brand Study' : 'Creator Study'}
+FOCUS AREAS: ${focus}
+${subjectDesc}
+
+STUDENT CONTEXT:
+- Their Niche: ${yourNiche}
+- Their Audience: ${yourAudience}
+- Apply This To: ${applyTo}
+
+Return this exact JSON:
+{
+  "subject_name": "${name || 'This Copy'}",
+  "profile": {
+    "what_they_do": "One sentence on what they do or what the copy is",
+    "who_they_serve": "Their audience",
+    "core_offer": "What they sell or promote",
+    "positioning": "How they position themselves in the market"
+  },
+  "why_winning": "3-5 sentences on the specific reasons they are succeeding — be precise, cite real examples from their content or the copy",
+  "core_strategy": "One tight paragraph describing their overall content/copy strategy — the big picture of how they operate",
+  "patterns": [
+    {
+      "number": "01",
+      "title": "Pattern name",
+      "body": "What the pattern is and why it works — be specific",
+      "example": "A real example from their content or the pasted copy"
+    },
+    {
+      "number": "02",
+      "title": "Pattern name",
+      "body": "What the pattern is and why it works",
+      "example": "Real example"
+    },
+    {
+      "number": "03",
+      "title": "Pattern name",
+      "body": "What the pattern is and why it works",
+      "example": "Real example"
+    },
+    {
+      "number": "04",
+      "title": "Pattern name",
+      "body": "What the pattern is and why it works",
+      "example": "Real example"
+    },
+    {
+      "number": "05",
+      "title": "Pattern name",
+      "body": "What the pattern is and why it works",
+      "example": "Real example"
+    }
+  ],
+  "steals": [
+    {
+      "principle": "The name of the principle being stolen",
+      "what_they_do": "Exactly how they use this in their content/copy",
+      "how_to_apply": "Specific, actionable version of this principle applied to ${yourNiche} for ${yourAudience} targeting ${applyTo}"
+    },
+    {
+      "principle": "Principle 2",
+      "what_they_do": "How they use it",
+      "how_to_apply": "How you apply it"
+    },
+    {
+      "principle": "Principle 3",
+      "what_they_do": "How they use it",
+      "how_to_apply": "How you apply it"
+    },
+    {
+      "principle": "Principle 4",
+      "what_they_do": "How they use it",
+      "how_to_apply": "How you apply it"
+    }
+  ],
+  "swipe_file": [
+    {
+      "type": "Hook",
+      "text": "A specific hook line or opening from their content worth saving",
+      "why": "Why this hook works and what makes it effective"
+    },
+    {
+      "type": "Hook",
+      "text": "Another strong hook",
+      "why": "Why it works"
+    },
+    {
+      "type": "CTA",
+      "text": "A CTA line worth saving",
+      "why": "Why it converts"
+    },
+    {
+      "type": "Transition",
+      "text": "A transition or bridge line that keeps attention",
+      "why": "Why it works"
+    },
+    {
+      "type": "Proof",
+      "text": "A proof or credibility line",
+      "why": "Why it lands"
+    },
+    {
+      "type": "Opening",
+      "text": "An opening line or intro worth studying",
+      "why": "Why it pulls people in"
+    }
+  ]
+}`;
+}
+
+async function study() {
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('spinner');
+  const status = document.getElementById('status');
+
+  const hasInput = currentMode === 'copy'
+    ? document.getElementById('pasteCopy').value.trim()
+    : document.getElementById('subjectName').value.trim();
+
+  if (!hasInput) {
+    status.textContent = currentMode === 'copy' ? 'Paste copy to study first.' : 'Enter a name to study.';
+    return;
+  }
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  status.textContent = 'Studying...';
+  document.getElementById('output').classList.remove('visible');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: buildPrompt() }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const d = JSON.parse(clean);
+
+    // OVERVIEW TAB
+    if (currentMode !== 'copy') {
+      const profileEl = document.getElementById('out-profile');
+      profileEl.innerHTML = `
+        <div class="profile-card">
+          <div class="profile-stat">
+            <div class="profile-stat-num" style="font-size:14px;line-height:1.4;">${d.profile?.what_they_do || '—'}</div>
+            <div class="profile-stat-label">What They Do</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-num" style="font-size:14px;line-height:1.4;">${d.profile?.who_they_serve || '—'}</div>
+            <div class="profile-stat-label">Who They Serve</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-num" style="font-size:14px;line-height:1.4;">${d.profile?.positioning || '—'}</div>
+            <div class="profile-stat-label">Positioning</div>
+          </div>
+        </div>`;
+    } else {
+      document.getElementById('profile-section').style.display = 'none';
+    }
+
+    document.getElementById('out-why').textContent = d.why_winning || '';
+    document.getElementById('out-strategy').textContent = d.core_strategy || '';
+
+    // PATTERNS TAB
+    const patternsEl = document.getElementById('out-patterns');
+    patternsEl.innerHTML = '';
+    (d.patterns || []).forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'pattern-card';
+      card.innerHTML = `
+        <div class="pattern-num">Pattern ${p.number}</div>
+        <div class="pattern-title">${p.title}</div>
+        <div class="pattern-body">${p.body}</div>
+        <div class="pattern-example">"${p.example}"</div>`;
+      patternsEl.appendChild(card);
+    });
+
+    // STEAL TAB
+    const stealEl = document.getElementById('out-steal');
+    stealEl.innerHTML = '';
+    (d.steals || []).forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'steal-card';
+      card.innerHTML = `
+        <div class="steal-label">Principle</div>
+        <div class="steal-principle">${s.principle}</div>
+        <div class="steal-original">${s.what_they_do}</div>
+        <div class="steal-apply-label">How You Apply It →</div>
+        <div class="steal-apply">${s.how_to_apply}</div>`;
+      stealEl.appendChild(card);
+    });
+
+    // SWIPE TAB
+    const swipeEl = document.getElementById('out-swipe');
+    swipeEl.innerHTML = '';
+    (d.swipe_file || []).forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'swipe-item';
+      item.innerHTML = `
+        <div class="swipe-type">${s.type}</div>
+        <div class="swipe-text">"${s.text}"</div>
+        <div class="swipe-why">${s.why}</div>`;
+      swipeEl.appendChild(item);
+    });
+
+    document.getElementById('output').classList.add('visible');
+    document.getElementById('outputLabel').textContent = `Study: ${d.subject_name || 'Results'}`;
+    switchTab('overview');
+    status.textContent = '✓ Done';
+    setTimeout(() => status.textContent = '', 3000);
+
+  } catch(err) {
+    console.error(err);
+    status.textContent = 'Error — check inputs and try again.';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function copyOutput() {
+  const sections = ['out-why','out-strategy'];
+  let text = sections.map(id => document.getElementById(id)?.textContent || '').filter(Boolean).join('\n\n---\n\n');
+  document.querySelectorAll('.pattern-card').forEach(c => {
+    text += '\n\n' + c.innerText;
+  });
+  document.querySelectorAll('.steal-card').forEach(c => {
+    text += '\n\n' + c.innerText;
+  });
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'COPIED!';
+    setTimeout(() => btn.textContent = 'COPY REPORT', 2000);
+  });
+}
+
+function clearAll() {
+  ['subjectName','subjectContext','pasteCopy','yourNiche','yourAudience','applyTo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('output').classList.remove('visible');
+  document.getElementById('status').textContent = '';
+}
+</script>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showBot(name) {
+  document.querySelectorAll(".bot-pane").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("pane-" + name).classList.add("active");
+  const navItems = document.querySelectorAll(".nav-item");
+  const order = ["home", "email", "shortform", "youtube", "rubric", "study", "outreach"];
+  const idx = order.indexOf(name);
+  if (navItems[idx]) navItems[idx].classList.add("active");
+  if (window.innerWidth <= 700) {
+    document.getElementById("sidebar").classList.remove("open");
+  }
+  window.scrollTo(0, 0);
+}
+
+function toggleMenu() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+</script>
+
+</body>
+</html>
